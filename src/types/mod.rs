@@ -8,4 +8,6 @@ pub trait Fold {
     }
 }
 
-pub struct Config {}
+pub struct Config {
+    pub column_width: u32,
+}
