@@ -2,9 +2,14 @@ mod list;
 mod local_assignment;
 mod token;
 
+use lazy_static::lazy_static;
 use luau_parser::types::Ast;
 
-use crate::types::Format;
+use crate::types::{Config, Format};
+
+lazy_static! {
+    pub static ref CONFIG: Config = Config {};
+}
 
 pub fn format_luau(ast: &Ast) -> String {
     let len = ast.statements.len();

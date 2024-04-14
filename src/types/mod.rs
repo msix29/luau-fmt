@@ -7,3 +7,5 @@ pub trait Fold {
         formatted_string.to_string()
     }
 }
+
+pub struct Config {}
