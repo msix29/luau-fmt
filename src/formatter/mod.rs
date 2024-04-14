@@ -1,6 +1,10 @@
+mod expression;
 mod list;
 mod local_assignment;
+mod name;
+mod statement;
 mod token;
+mod type_definition;
 
 use lazy_static::lazy_static;
 use luau_parser::types::Ast;
