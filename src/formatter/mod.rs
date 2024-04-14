@@ -8,7 +8,7 @@ use luau_parser::types::Ast;
 use crate::types::{Config, Format};
 
 lazy_static! {
-    pub static ref CONFIG: Config = Config {};
+    pub static ref CONFIG: Config = Config::default();
 }
 
 pub fn format_luau(ast: &Ast) -> String {
