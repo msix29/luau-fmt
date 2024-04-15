@@ -3,9 +3,9 @@ use luau_parser::types::Statement;
 use crate::types::Format;
 
 impl Format for Statement {
-    fn format(&self) -> String {
+    fn format(&self, indentation: &mut i32) -> String {
         match self {
-            Statement::LocalAssignment(_) => todo!(),
+            Statement::LocalAssignment(local_assignment) => local_assignment.format(indentation),
             Statement::TypeDefinition(_) => todo!(),
             Statement::IfStatement(_) => todo!(),
             Statement::DoBlock(_) => todo!(),

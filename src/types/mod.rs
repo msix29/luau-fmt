@@ -1,8 +1,8 @@
 pub trait Format {
-    fn format(&self) -> String;
+    fn format(&self, indentation: &mut i32) -> String;
 }
 pub trait FormatWithArgs<P> {
-    fn format_with_args(&self, parameter: P) -> String;
+    fn format_with_args(&self, indentation: &mut i32, parameter: P) -> String;
 }
 
 pub trait Fold {
