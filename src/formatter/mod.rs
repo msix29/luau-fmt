@@ -26,9 +26,9 @@ impl Format for Ast {
         let last_index = len - 1;
         for (i, token) in self.statements.iter().enumerate() {
             if i == last_index {
-                code.push_str(&token.format(indentation));
+                code.push_str(&token.0.format(indentation));
             } else {
-                code.push_str(token.format(indentation).trim_end());
+                code.push_str(token.0.format(indentation).trim_end());
             }
         }
 

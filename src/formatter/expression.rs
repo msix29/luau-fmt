@@ -8,10 +8,11 @@ use crate::{
 impl Format for Expression {
     fn format(&self, indentation: &mut i32) -> String {
         match self {
-            Expression::Nil(value)
-            | Expression::Boolean(value)
-            | Expression::Number(value)
-            | Expression::String(value) => value.format(indentation),
+            Expression::Nil(value) | Expression::Boolean(value) | Expression::Number(value) => {
+                value.format(indentation)
+            }
+            // Strings will have more formatting to them.
+            Expression::String(value) => value.format(indentation),
             Expression::Function {
                 generics,
                 parameters,
@@ -30,7 +31,9 @@ impl Format for Expression {
                 body.format(indentation),
             ),
             Expression::FunctionCall(_) => todo!(),
-            Expression::ExpressionWrap(_) => todo!(),
+            Expression::ExpressionWrap(wrap) => {
+                format!("({})", wrap.expression.format(indentation))
+            }
             Expression::Var(_) => todo!(),
             Expression::Table(_) => todo!(),
             Expression::UnaryExpression {
