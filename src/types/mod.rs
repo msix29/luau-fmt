@@ -13,10 +13,10 @@ pub trait FormatWithArgs<P> {
     fn format_with_args(&self, indentation: &mut i32, parameter: P) -> String;
 }
 
-/// A trait which represents that this struct can be folded.
-pub trait Fold {
-    /// Fold this struct into a string.
-    fn fold(&self, formatted_string: &str) -> String {
+/// A trait which represents that this struct can be wrapped into multiple lines.
+pub trait Wrap {
+    /// Wrap this struct into a multi-line string. If possible.
+    fn wrap(&self, formatted_string: &str) -> String {
         formatted_string.to_string()
     }
 }
