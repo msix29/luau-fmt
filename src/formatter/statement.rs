@@ -6,7 +6,7 @@ impl Format for Statement {
     fn format(&self, indentation: &mut i32) -> String {
         match self {
             Statement::LocalAssignment(local_assignment) => local_assignment.format(indentation),
-            Statement::TypeDefinition(_) => todo!(),
+            Statement::TypeDefinition(type_definition) => type_definition.format(indentation),
             Statement::IfStatement(_) => todo!(),
             Statement::DoBlock(_) => todo!(),
             Statement::GenericFor(_) => todo!(),
