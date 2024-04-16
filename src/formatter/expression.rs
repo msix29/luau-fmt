@@ -25,7 +25,7 @@ impl Format for Expression {
                 body,
                 ..
             } => format!(
-                "function{}({}){}{}{}end",
+                "function{}({}){}{}\n{}end",
                 generics.format_with_args(indentation, " "),
                 parameters.format_with_args(indentation, " "),
                 colon.as_ref().map_or_else(|| "", |_| ": "),

@@ -8,7 +8,7 @@ impl Format for Statement {
             Statement::LocalAssignment(local_assignment) => local_assignment.format(indentation),
             Statement::TypeDefinition(type_definition) => type_definition.format(indentation),
             Statement::IfStatement(_) => todo!(),
-            Statement::DoBlock(_) => todo!(),
+            Statement::DoBlock(do_block) => do_block.format(indentation),
             Statement::GenericFor(_) => todo!(),
             Statement::NumericalFor(_) => todo!(),
             Statement::RepeatBlock(_) => todo!(),
