@@ -16,3 +16,24 @@ impl<T: Format> FormatWithArgs<&str> for List<T> {
             .join(join_with)
     }
 }
+
+impl<P: Copy, T: FormatWithArgs<P>> FormatWithArgs<(&str, P)> for List<T> {
+    fn format_with_args(&self, indentation: &mut i32, (join_with, parameter): (&str, P)) -> String {
+        self.items
+            .iter()
+            .map(|item| match item {
+                luau_parser::types::ListItem::Trailing { item, separator } => {
+                    format!(
+                        "{}{}",
+                        item.format_with_args(indentation, parameter),
+                        separator.get_raw_value()
+                    )
+                }
+                luau_parser::types::ListItem::NonTrailing(item) => {
+                    item.format_with_args(indentation, parameter)
+                }
+            })
+            .collect::<Vec<String>>()
+            .join(join_with)
+    }
+}

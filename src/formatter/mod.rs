@@ -30,6 +30,7 @@ impl Format for Ast {
             } else {
                 code.push_str(token.0.format(indentation).trim_end());
             }
+            code.push('\n');
         }
 
         format!("{}\n", code.trim())

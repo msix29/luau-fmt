@@ -1,4 +1,8 @@
-use luau_parser::types::{ElseIfExpression, Expression};
+use luau_parser::types::{
+    ElseIfExpression, Expression, FunctionArguments, FunctionCall, FunctionCallInvoked, PrefixExp,
+    Table, TableAccess, TableAccessKey, TableAccessPrefix, TableField, TableFieldValue, TableKey,
+    Var,
+};
 
 use crate::{
     types::{Format, FormatWithArgs},
@@ -21,21 +25,23 @@ impl Format for Expression {
                 body,
                 ..
             } => format!(
-                "function{}({}){}{}\n{}\nend",
+                "function{}({}){}{}{}end",
                 generics.format_with_args(indentation, " "),
                 parameters.format_with_args(indentation, " "),
                 colon.as_ref().map_or_else(|| "", |_| ": "),
                 returns
                     .as_ref()
                     .map_or_else(String::new, |returns| returns.format(indentation)),
-                body.format(indentation),
+                body.format(&mut (*indentation + 1)),
             ),
-            Expression::FunctionCall(_) => todo!(),
+            Expression::FunctionCall(funcion_call) => funcion_call.format(indentation),
             Expression::ExpressionWrap(wrap) => {
                 format!("({})", wrap.expression.format(indentation))
             }
-            Expression::Var(_) => todo!(),
-            Expression::Table(_) => todo!(),
+            Expression::Var(var) => var.format(indentation),
+            Expression::Table(table) => {
+                table.format_with_args(&mut (*indentation + 1), (" = ", ","))
+            }
             Expression::UnaryExpression {
                 operator,
                 expression,
@@ -103,6 +109,155 @@ impl Format for Expression {
                         else_expression.format(indentation)
                     )
                 }
+            }
+        }
+    }
+}
+
+impl Format for PrefixExp {
+    fn format(&self, indentation: &mut i32) -> String {
+        match self {
+            PrefixExp::Var(var) => var.format(indentation),
+            PrefixExp::FunctionCall(function_call) => function_call.format(indentation),
+            PrefixExp::ExpressionWrap(wrap) => format!("({})", wrap.expression.format(indentation)),
+        }
+    }
+}
+impl Format for Var {
+    fn format(&self, indentation: &mut i32) -> String {
+        match self {
+            Var::Name(name) => name.format(indentation),
+            Var::TableAccess(table_access) => table_access.format(indentation),
+        }
+    }
+}
+
+impl Format for TableAccess {
+    fn format(&self, indentation: &mut i32) -> String {
+        format!(
+            "{}{}",
+            self.prefix.format(indentation),
+            self.accessed_keys
+                .iter()
+                .map(|key| key.format(indentation))
+                .collect::<Vec<String>>()
+                .join("")
+        )
+    }
+}
+impl Format for TableAccessPrefix {
+    fn format(&self, indentation: &mut i32) -> String {
+        match self {
+            TableAccessPrefix::Name(name) => name.format(indentation),
+            TableAccessPrefix::FunctionCall(function_call) => function_call.format(indentation),
+            TableAccessPrefix::ExpressionWrap(wrap) => {
+                format!("({})", wrap.expression.format(indentation))
+            }
+        }
+    }
+}
+impl Format for TableAccessKey {
+    fn format(&self, indentation: &mut i32) -> String {
+        match self {
+            TableAccessKey::Expression(expression) => expression.format_with_args(indentation, ""),
+            TableAccessKey::Name { name, .. } => format!(".{}", name.format(indentation)),
+        }
+    }
+}
+
+impl FormatWithArgs<(&str, &str)> for Table {
+    fn format_with_args(
+        &self,
+        indentation: &mut i32,
+        (key_value_separator, fields_separator): (&str, &str),
+    ) -> String {
+        let len = self.fields.items.len();
+        if len == 0 {
+            String::from("{}")
+        } else if len == 1 {
+            format!(
+                "{{ {} }}",
+                self.fields.items[0].format_with_args(indentation, key_value_separator)
+            )
+        } else {
+            let spaces = TAB.repeat(*indentation as usize);
+            format!(
+                "{{\n{}{}{}\n{}}}",
+                spaces,
+                self.fields
+                    .items
+                    .iter()
+                    .map(|field| field.format_with_args(indentation, key_value_separator))
+                    .collect::<Vec<String>>()
+                    .join(&format!("{}\n{}", fields_separator, spaces)),
+                fields_separator, // trailing
+                TAB.repeat((indentation.saturating_sub(1)) as usize),
+            )
+        }
+    }
+}
+impl FormatWithArgs<&str> for TableField {
+    fn format_with_args(&self, indentation: &mut i32, key_value_separator: &str) -> String {
+        format!(
+            "{}{}",
+            self.key.format_with_args(indentation, key_value_separator),
+            self.value.format(indentation)
+        )
+    }
+}
+impl FormatWithArgs<&str> for TableKey {
+    fn format_with_args(&self, indentation: &mut i32, separator: &str) -> String {
+        match self {
+            TableKey::UndefinedNumber(_) | TableKey::UndefinedString(_) => String::new(),
+            TableKey::String(string) => format!("{}{}", string.format(indentation), separator),
+            TableKey::Expression { expression, .. } => {
+                format!("[{}]{}", expression.format(indentation), separator)
+            }
+            TableKey::Type { r#type, .. } => {
+                format!("[{}]{}", r#type.format(indentation), separator)
+            }
+        }
+    }
+}
+impl Format for TableFieldValue {
+    fn format(&self, indentation: &mut i32) -> String {
+        match self {
+            TableFieldValue::Expression(expression) => expression.format(indentation),
+            TableFieldValue::Type(r#type) => r#type.format(indentation),
+        }
+    }
+}
+
+impl Format for FunctionCall {
+    fn format(&self, indentation: &mut i32) -> String {
+        format!(
+            "{}{}",
+            self.invoked.format(indentation),
+            self.arguments.format(indentation)
+        )
+    }
+}
+impl Format for FunctionCallInvoked {
+    fn format(&self, indentation: &mut i32) -> String {
+        match self {
+            FunctionCallInvoked::Function(name) => name.format(indentation),
+            FunctionCallInvoked::TableMethod { table, method, .. } => format!(
+                "{}:{}",
+                table.format(indentation),
+                method.format(indentation)
+            ),
+        }
+    }
+}
+impl Format for FunctionArguments {
+    fn format(&self, indentation: &mut i32) -> String {
+        match self {
+            FunctionArguments::String(string) => string.format(indentation),
+            FunctionArguments::Table(table) => {
+                table.format_with_args(&mut (*indentation + 1), (" = ", ","))
+            }
+            FunctionArguments::List { arguments, .. } => {
+                format!("({})", arguments.format_with_args(indentation, ", "))
             }
         }
     }
