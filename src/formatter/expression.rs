@@ -100,7 +100,7 @@ impl Format for Expression {
                             .iter()
                             .map(|else_if| else_if.format(indentation))
                             .collect::<Vec<String>>()
-                            .join(&format!("\n{separator}")),
+                            .join(&separator),
                         else_expression.format(indentation)
                     )
                 } else {
