@@ -1,3 +1,5 @@
+//! Implements formatting traits for do blocks.
+
 use luau_parser::types::DoBlock;
 
 use crate::types::Format;

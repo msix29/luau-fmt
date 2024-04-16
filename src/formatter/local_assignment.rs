@@ -1,3 +1,5 @@
+//! Holds all implementations for local assignments.
+
 use luau_parser::types::LocalAssignment;
 
 use crate::types::{Format, FormatWithArgs};

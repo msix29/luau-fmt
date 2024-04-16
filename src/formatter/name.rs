@@ -1,3 +1,5 @@
+//! Holds all implementations for names.
+
 use luau_parser::types::NormalizedName;
 
 use crate::types::Format;

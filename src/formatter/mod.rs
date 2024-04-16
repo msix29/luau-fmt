@@ -1,3 +1,5 @@
+//! Holds all implementations.
+
 mod blocks;
 mod expression;
 mod list;
@@ -16,11 +18,14 @@ use crate::{
 };
 
 lazy_static! {
+    /// The global config specified by the user.
     pub static ref CONFIG: Config = Config::default();
 }
 
+/// An enum representing formatting errors that stopped [`format_luau`] from working.
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub enum FormattingError {
+    /// The [`ast`](Ast) is incomplete, meaning it had syntax errors.
     IncompleteAst,
 }
 

@@ -1,3 +1,5 @@
+//! Holds all implementations for statements.
+
 use luau_parser::types::Statement;
 
 use crate::types::Format;

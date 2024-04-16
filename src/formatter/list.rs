@@ -1,4 +1,6 @@
-use luau_parser::types::{HasRawValue, List};
+//! Holds all implementation for lists.
+
+use luau_parser::types::{HasRawValue, List, ListItem};
 
 use crate::types::{Format, FormatWithArgs};
 
@@ -7,10 +9,10 @@ impl<T: Format> FormatWithArgs<&str> for List<T> {
         self.items
             .iter()
             .map(|item| match item {
-                luau_parser::types::ListItem::Trailing { item, separator } => {
+                ListItem::Trailing { item, separator } => {
                     format!("{}{}", item.format(indentation), separator.get_raw_value())
                 }
-                luau_parser::types::ListItem::NonTrailing(item) => item.format(indentation),
+                ListItem::NonTrailing(item) => item.format(indentation),
             })
             .collect::<Vec<String>>()
             .join(join_with)
@@ -22,14 +24,14 @@ impl<P: Copy, T: FormatWithArgs<P>> FormatWithArgs<(&str, P)> for List<T> {
         self.items
             .iter()
             .map(|item| match item {
-                luau_parser::types::ListItem::Trailing { item, separator } => {
+                ListItem::Trailing { item, separator } => {
                     format!(
                         "{}{}",
                         item.format_with_args(indentation, parameter),
                         separator.get_raw_value()
                     )
                 }
-                luau_parser::types::ListItem::NonTrailing(item) => {
+                ListItem::NonTrailing(item) => {
                     item.format_with_args(indentation, parameter)
                 }
             })

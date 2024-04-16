@@ -1,3 +1,5 @@
+//! Implements formatting traits for single tokens.
+
 use luau_parser::types::SingleToken;
 
 use crate::types::Format;

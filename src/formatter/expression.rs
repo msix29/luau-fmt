@@ -1,3 +1,5 @@
+//! Holds all implementations for expressions.
+
 use luau_parser::types::{
     ElseIfExpression, Expression, FunctionArguments, FunctionCall, FunctionCallInvoked, PrefixExp,
     Table, TableAccess, TableAccessKey, TableAccessPrefix, TableField, TableFieldValue, TableKey,
