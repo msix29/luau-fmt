@@ -8,7 +8,7 @@ mod token;
 mod type_definition;
 
 use lazy_static::lazy_static;
-use luau_parser::types::Ast;
+use luau_parser::types::{Ast, AstStatus};
 
 use crate::{
     types::{Config, Format},
@@ -17,6 +17,11 @@ use crate::{
 
 lazy_static! {
     pub static ref CONFIG: Config = Config::default();
+}
+
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub enum FormattingError {
+    IncompleteAst,
 }
 
 impl Format for Ast {
@@ -43,7 +48,15 @@ impl Format for Ast {
     }
 }
 
+/// A "safer" version for [ast::format](Ast::format). This will return `Err`
+/// if the [`ast's status`](Ast::status) isn't [`complete`](AstStatus::Complete).
+/// This function is more "safe" as it ensures the resulted output will always
+/// match the input code in terms of functionality.
 #[inline]
-pub fn format_luau(ast: &Ast) -> String {
-    ast.format(&mut 0)
+pub fn format_luau(ast: &Ast) -> Result<String, FormattingError> {
+    if ast.status == AstStatus::Complete {
+        Ok(ast.format(&mut 0))
+    } else {
+        Err(FormattingError::IncompleteAst)
+    }
 }
