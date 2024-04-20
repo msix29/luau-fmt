@@ -63,11 +63,11 @@ impl Format for TypeValue {
                 right.format(indentation)
             ),
             TypeValue::Module {
-                module, type_info, ..
+                module, type_value, ..
             } => format!(
                 "{}.{}",
                 module.format(indentation),
-                type_info.format(indentation)
+                type_value.format(indentation)
             ),
             TypeValue::Optional { base, .. } => format!("{}?", base.format(indentation)),
             TypeValue::Table(table) => table.format_with_args(&mut (*indentation + 1), (": ", ",")),
