@@ -49,7 +49,7 @@ impl Format for TypeValue {
             TypeValue::Generic { base, generics, .. } => format!(
                 "{}<{}>",
                 base.format(indentation),
-                generics.format_with_args(indentation, " ")
+                generics.format_with_args(indentation, "")
             ),
             TypeValue::GenericPack { name, .. } => format!("{}...", name.format(indentation)),
             TypeValue::Intersection { left, right, .. } => format!(

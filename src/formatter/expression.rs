@@ -28,7 +28,7 @@ impl Format for Expression {
                 ..
             } => format!(
                 "function{}({}){}{}\n{}end",
-                generics.format_with_args(indentation, " "),
+                generics.format_with_args(indentation, ""),
                 parameters.format_with_args(indentation, " "),
                 colon.as_ref().map_or_else(|| "", |_| ": "),
                 returns
@@ -259,7 +259,7 @@ impl Format for FunctionArguments {
                 table.format_with_args(&mut (*indentation + 1), (" = ", ","))
             }
             FunctionArguments::List { arguments, .. } => {
-                format!("({})", arguments.format_with_args(indentation, ", "))
+                format!("({})", arguments.format_with_args(indentation, " "))
             }
         }
     }
