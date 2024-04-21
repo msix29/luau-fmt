@@ -1,0 +1,37 @@
+//! Implements formatting traits for do blocks.
+
+use luau_parser::types::{ElseIfStatement, ElseStatement, IfStatement};
+
+use crate::types::Format;
+
+impl Format for IfStatement {
+    fn format(&self, indentation: &mut i32) -> String {
+        format!(
+            "if {} then\n{}{}{}end",
+            self.condition.format(indentation),
+            self.body.format(&mut (*indentation + 1)),
+            self.else_if_expressions
+                .iter()
+                .map(|else_if_expression| else_if_expression.format(indentation))
+                .collect::<String>(),
+            self.else_expression
+                .as_ref()
+                .map_or_else(String::new, |else_expression| else_expression
+                    .format(indentation))
+        )
+    }
+}
+impl Format for ElseIfStatement {
+    fn format(&self, indentation: &mut i32) -> String {
+        format!(
+            "elseif {} then\n{}",
+            self.condition.format(indentation),
+            self.body.format(&mut (*indentation + 1))
+        )
+    }
+}
+impl Format for ElseStatement {
+    fn format(&self, indentation: &mut i32) -> String {
+        format!("else\n{}", self.body.format(&mut (*indentation + 1)))
+    }
+}

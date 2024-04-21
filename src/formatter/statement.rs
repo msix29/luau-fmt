@@ -9,7 +9,7 @@ impl Format for Statement {
         match self {
             Statement::LocalAssignment(local_assignment) => local_assignment.format(indentation),
             Statement::TypeDefinition(type_definition) => type_definition.format(indentation),
-            Statement::IfStatement(_) => todo!(),
+            Statement::IfStatement(if_statement) => if_statement.format(indentation),
             Statement::DoBlock(do_block) => do_block.format(indentation),
             Statement::GenericFor(_) => todo!(),
             Statement::NumericalFor(_) => todo!(),
