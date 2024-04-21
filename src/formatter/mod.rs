@@ -9,11 +9,13 @@ mod statement;
 mod token;
 mod type_definition;
 
+use std::sync::Arc;
+
 use lazy_static::lazy_static;
 use luau_parser::types::{Ast, AstStatus};
 
 use crate::{
-    types::{Config, Format},
+    types::{Config, Format, FormatWithArgs},
     TAB,
 };
 
@@ -50,6 +52,17 @@ impl Format for Ast {
         }
 
         format!("{}{}\n", spaces, code.trim())
+    }
+}
+
+impl<T: Format> Format for Arc<T> {
+    fn format(&self, indentation: &mut i32) -> String {
+        (**self).format(indentation)
+    }
+}
+impl<P, T: FormatWithArgs<P>> FormatWithArgs<P> for Arc<T> {
+    fn format_with_args(&self, indentation: &mut i32, parameter: P) -> String {
+        (**self).format_with_args(indentation, parameter)
     }
 }
 

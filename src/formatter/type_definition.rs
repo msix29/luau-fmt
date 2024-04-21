@@ -84,11 +84,6 @@ impl Format for TypeValue {
         }
     }
 }
-impl Format for Arc<TypeValue> {
-    fn format(&self, indentation: &mut i32) -> String {
-        (**self).format(indentation)
-    }
-}
 
 impl FormatWithArgs<&str> for Option<GenericDeclaration> {
     fn format_with_args(&self, indentation: &mut i32, suffix: &str) -> String {
