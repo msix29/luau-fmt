@@ -1,5 +1,7 @@
 //! Implements formatting traits for type definitions.
 
+use std::sync::Arc;
+
 use luau_parser::types::{
     GenericDeclaration, GenericDeclarationParameter, GenericParameterInfo,
     GenericParameterInfoDefault, TypeDefinition, TypeValue,
@@ -80,6 +82,11 @@ impl Format for TypeValue {
             }
             TypeValue::VariadicPack { name, .. } => format!("...{}", name.format(indentation)),
         }
+    }
+}
+impl Format for Arc<TypeValue> {
+    fn format(&self, indentation: &mut i32) -> String {
+        (**self).format(indentation)
     }
 }
 
