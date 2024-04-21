@@ -1,7 +1,5 @@
 //! Implements formatting traits for type definitions.
 
-use std::sync::Arc;
-
 use luau_parser::types::{
     GenericDeclaration, GenericDeclarationParameter, GenericParameterInfo,
     GenericParameterInfoDefault, TypeDefinition, TypeValue,
