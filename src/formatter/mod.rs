@@ -12,7 +12,7 @@ mod type_definition;
 use std::sync::Arc;
 
 use lazy_static::lazy_static;
-use luau_parser::types::{Ast, AstStatus};
+use luau_parser::types::{Ast, AstStatus, Print};
 
 use crate::{
     types::{Config, Format, FormatWithArgs},
@@ -41,12 +41,11 @@ impl Format for Ast {
         let spaces = TAB.repeat(*indentation as usize);
         let statement_separator = format!("\n{}", spaces);
         let mut code = String::new();
-        let last_index = len - 1;
-        for (i, token) in self.statements.iter().enumerate() {
-            if i == last_index {
-                code.push_str(&token.0.format(indentation));
+        for (statement, _) in self.statements.iter() {
+            if statement.print().ends_with("\n\n") {
+                code.push_str(&(statement.format(indentation).trim_end().to_string() + "\n"));
             } else {
-                code.push_str(token.0.format(indentation).trim_end());
+                code.push_str(&statement.format(indentation));
             }
             code.push_str(&statement_separator);
         }

@@ -13,10 +13,10 @@ impl Format for TypeDefinition {
             let export = self
                 .export_keyword
                 .as_ref()
-                .map_or_else(|| "".to_string(), |export| export.format(indentation));
+                .map_or_else(|| "".to_string(), |export| export.format(indentation) + " ");
 
             format!(
-                "{} {} {}{} = {}",
+                "{}{} {}{} = {}",
                 export,
                 type_keyword.format(indentation),
                 self.type_name.format(indentation),
