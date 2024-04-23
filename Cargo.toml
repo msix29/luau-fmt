@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 lazy_static = "1.4.0"
 luau-parser = { path = "../parser", default-features = false }
+regex = "1.10.4"

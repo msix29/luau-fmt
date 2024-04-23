@@ -1,15 +1,70 @@
 //! Holds all implementations for expressions.
 
-use luau_parser::types::{
-    ElseIfExpression, Expression, FunctionArguments, FunctionCall, FunctionCallInvoked, PrefixExp,
-    Table, TableAccess, TableAccessKey, TableAccessPrefix, TableField, TableFieldValue, TableKey,
-    Var,
+// Clippy is drunk.
+#![allow(clippy::invalid_regex)]
+
+use lazy_static::lazy_static;
+use luau_parser::{
+    types::{
+        ElseIfExpression, Expression, FunctionArguments, FunctionCall, FunctionCallInvoked,
+        PrefixExp, SingleToken, Table, TableAccess, TableAccessKey, TableAccessPrefix, TableField,
+        TableFieldValue, TableKey, Var,
+    },
+    utils::strip_string_delimiters,
 };
+use regex::Regex;
 
 use crate::{
-    types::{Format, FormatWithArgs},
+    types::{Format, FormatWithArgs, QuoteStyle},
     TAB,
 };
+
+use super::CONFIG;
+
+lazy_static! {
+    static ref ESCAPED_QUOTE: Regex = Regex::new(r#"([^\\]((\\{2})+)?)\\'"#).unwrap();
+    static ref QUOTE: Regex = Regex::new(r#"((\\{2})+)?'"#).unwrap();
+    static ref ESCAPED_DOUBLE_QUOTE: Regex = Regex::new(r#"([^\\]((\\{2})+)?)\\""#).unwrap();
+    static ref DOUBLE_QUOTE: Regex = Regex::new(r#"((\\{2})+)?""#).unwrap();
+}
+
+/// Formats a string and changes quote style if needed.
+pub(crate) fn format_string(string: &SingleToken, indentation: &mut i32) -> String {
+    let formatted = string.format(indentation);
+    if formatted.starts_with('`') || (formatted.starts_with('[') && formatted.contains('\n')) {
+        // If it's an interpolated strings, don't do anything to it.
+        // And if it's a multi-line string, also don't do anything to it.
+        return formatted;
+    }
+    let stripped_formatted = strip_string_delimiters(&formatted);
+
+    match CONFIG.read().unwrap().quote_style {
+        QuoteStyle::Single => {
+            return format!("'{}'", QUOTE.replace_all(&stripped_formatted, "\\'"))
+        }
+        QuoteStyle::PreferSingle => {
+            if !QUOTE.is_match(&stripped_formatted) {
+                return format!(
+                    "'{}'",
+                    ESCAPED_DOUBLE_QUOTE.replace_all(&stripped_formatted, "$1\"")
+                );
+            }
+        }
+        QuoteStyle::Double => {
+            return format!(r#""{}""#, QUOTE.replace_all(&stripped_formatted, r#"\\""#))
+        }
+        QuoteStyle::PreferDouble => {
+            if !DOUBLE_QUOTE.is_match(&stripped_formatted) {
+                return format!(
+                    r#""{}""#,
+                    ESCAPED_QUOTE.replace_all(&stripped_formatted, "$1'")
+                );
+            }
+        }
+    };
+
+    formatted
+}
 
 impl Format for Expression {
     fn format(&self, indentation: &mut i32) -> String {
@@ -17,8 +72,7 @@ impl Format for Expression {
             Expression::Nil(value) | Expression::Boolean(value) | Expression::Number(value) => {
                 value.format(indentation)
             }
-            // Strings will have more formatting to them.
-            Expression::String(value) => value.format(indentation),
+            Expression::String(string) => format_string(string, indentation),
             Expression::Function {
                 generics,
                 parameters,
@@ -272,5 +326,56 @@ impl Format for ElseIfExpression {
             self.condition.format(indentation),
             self.expression.format(indentation)
         )
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use luau_parser::types::SingleToken;
+    use crate::formatter::expression::format_string;
+
+    macro_rules! test_strings {
+        ($input:literal, $output:literal) => {
+            assert_eq!(format_string(&SingleToken::new($input), &mut 0), $output)
+        };
+    }
+
+    /*
+local _ = `hi, it's me!`
+local _ = "hi, it's me!"
+local _ = "hi, it's me!"
+local _ = [[
+    hi, it's me!
+]]
+ */
+
+    #[test]
+    fn string_formatting_1() {
+        test_strings!(r#""hi""#, r#""hi""#)
+    }
+
+    #[test]
+    fn string_formatting_2() {
+        test_strings!(r#""Escaped quotes are like \"this!\"""#, r#""Escaped quotes are like \"this!\"""#)
+    }
+
+    #[test]
+    fn string_formatting_3() {
+        test_strings!(r#"'Escaped quotes are like "this!"'"#, r#"'Escaped quotes are like "this!"'"#)
+    }
+
+    #[test]
+    fn string_formatting_4() {
+        test_strings!("`backticks don't change`", "`backticks don't change`")
+    }
+
+    #[test]
+    fn string_formatting_5() {
+        test_strings!(r#""It's lovely""#, r#""It's lovely""#)
+    }
+
+    #[test]
+    fn string_formatting_6() {
+        test_strings!("'It\'s lovely'", r#""It's lovely""#)
     }
 }

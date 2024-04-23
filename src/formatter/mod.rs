@@ -12,7 +12,7 @@ mod statement;
 mod token;
 mod type_definition;
 
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 
 use lazy_static::lazy_static;
 use luau_parser::types::{Ast, AstStatus, Print};
@@ -24,7 +24,7 @@ use crate::{
 
 lazy_static! {
     /// The global config specified by the user.
-    pub static ref CONFIG: Config = Config::default();
+    pub static ref CONFIG: RwLock<Config> = RwLock::new(Config::default());
 }
 
 /// An enum representing formatting errors that stopped [`format_luau`] from working.

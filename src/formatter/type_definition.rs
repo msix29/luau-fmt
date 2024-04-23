@@ -7,6 +7,8 @@ use luau_parser::types::{
 
 use crate::types::{Format, FormatWithArgs};
 
+use super::expression::format_string;
+
 impl Format for TypeDefinition {
     fn format(&self, indentation: &mut i32) -> String {
         if let Some(type_keyword) = &self.type_keyword {
@@ -31,9 +33,8 @@ impl Format for TypeDefinition {
 impl Format for TypeValue {
     fn format(&self, indentation: &mut i32) -> String {
         match self {
-            TypeValue::Basic(value) | TypeValue::String(value) | TypeValue::Boolean(value) => {
-                value.format(indentation)
-            }
+            TypeValue::Basic(value) | TypeValue::Boolean(value) => value.format(indentation),
+            TypeValue::String(string) => format_string(string, indentation),
             TypeValue::Wrap { r#type, .. } => format!("({})", r#type.format(indentation)),
             TypeValue::Function {
                 generics,
