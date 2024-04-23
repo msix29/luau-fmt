@@ -15,12 +15,14 @@ impl Format for Statement {
             Statement::NumericalFor(numerical_for) => numerical_for.format(indentation),
             Statement::RepeatBlock(repeat_block) => repeat_block.format(indentation),
             Statement::WhileLoop(while_loop) => while_loop.format(indentation),
-            Statement::SetExpression(_) => todo!(),
-            Statement::CompoundSetExpression(_) => todo!(),
-            Statement::FunctionCall(_) => todo!(),
-            Statement::LocalFunction(_) => todo!(),
-            Statement::GlobalFunction(_) => todo!(),
-            Statement::Comment(_) => todo!(),
+            Statement::SetExpression(set_expression) => set_expression.format(indentation),
+            Statement::CompoundSetExpression(compound_set_expression) => {
+                compound_set_expression.format(indentation)
+            }
+            Statement::FunctionCall(function_call) => function_call.format(indentation),
+            Statement::LocalFunction(local_function) => local_function.format(indentation),
+            Statement::GlobalFunction(global_function) => global_function.format(indentation),
+            Statement::Comment(comment) => comment.format(indentation),
         }
     }
 }

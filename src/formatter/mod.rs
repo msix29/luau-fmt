@@ -1,10 +1,13 @@
 //! Holds all implementations.
 
 mod blocks;
+mod comment;
 mod expression;
+mod functions;
 mod list;
 mod local_assignment;
 mod name;
+mod set_expressions;
 mod statement;
 mod token;
 mod type_definition;
@@ -59,6 +62,16 @@ impl<T: Format> Format for Arc<T> {
         (**self).format(indentation)
     }
 }
+impl<A: Format, B: Format> Format for (A, B) {
+    fn format(&self, indentation: &mut i32) -> String {
+        format!(
+            "{}{}",
+            self.0.format(indentation),
+            self.1.format(indentation)
+        )
+    }
+}
+
 impl<P, T: FormatWithArgs<P>> FormatWithArgs<P> for Arc<T> {
     fn format_with_args(&self, indentation: &mut i32, parameter: P) -> String {
         (**self).format_with_args(indentation, parameter)
