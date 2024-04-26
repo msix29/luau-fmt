@@ -5,7 +5,9 @@
 
 use lazy_static::lazy_static;
 use luau_parser::types::{
-    ElseIfExpression, Expression, FunctionArguments, FunctionCall, FunctionCallInvoked, PrefixExp, SingleToken, StringLiteral, Table, TableAccess, TableAccessKey, TableAccessPrefix, TableField, TableFieldValue, TableKey, Var
+    ElseIfExpression, Expression, FunctionArguments, FunctionCall, FunctionCallInvoked, Number,
+    PrefixExp, SingleToken, StringLiteral, Table, TableAccess, TableAccessKey, TableAccessPrefix,
+    TableField, TableFieldValue, TableKey, Var,
 };
 use regex::Regex;
 
@@ -64,9 +66,9 @@ pub(crate) fn format_string(string: &SingleToken, indentation: &mut i32) -> Stri
 impl Format for Expression {
     fn format(&self, indentation: &mut i32) -> String {
         match self {
-            Expression::Nil(value) | Expression::Boolean(value) | Expression::Number(value) => {
-                value.format(indentation)
-            }
+            Expression::Nil(value)
+            | Expression::Boolean(value)
+            | Expression::Number(Number(value)) => value.format(indentation),
             Expression::String(string) => format_string(string, indentation),
             Expression::Function {
                 generics,
