@@ -4,13 +4,8 @@
 #![allow(clippy::invalid_regex)]
 
 use lazy_static::lazy_static;
-use luau_parser::{
-    types::{
-        ElseIfExpression, Expression, FunctionArguments, FunctionCall, FunctionCallInvoked,
-        PrefixExp, SingleToken, Table, TableAccess, TableAccessKey, TableAccessPrefix, TableField,
-        TableFieldValue, TableKey, Var,
-    },
-    utils::strip_string_delimiters,
+use luau_parser::types::{
+    ElseIfExpression, Expression, FunctionArguments, FunctionCall, FunctionCallInvoked, PrefixExp, SingleToken, StringLiteral, Table, TableAccess, TableAccessKey, TableAccessPrefix, TableField, TableFieldValue, TableKey, Var
 };
 use regex::Regex;
 
@@ -36,7 +31,7 @@ pub(crate) fn format_string(string: &SingleToken, indentation: &mut i32) -> Stri
         // And if it's a multi-line string, also don't do anything to it.
         return formatted;
     }
-    let stripped_formatted = strip_string_delimiters(&formatted);
+    let stripped_formatted = StringLiteral::strip_delimiters(&formatted);
 
     match CONFIG.read().unwrap().quote_style {
         QuoteStyle::Single => {
@@ -331,8 +326,8 @@ impl Format for ElseIfExpression {
 
 #[cfg(test)]
 mod test {
-    use luau_parser::types::SingleToken;
     use crate::formatter::expression::format_string;
+    use luau_parser::types::SingleToken;
 
     macro_rules! test_strings {
         ($input:literal, $output:literal) => {
@@ -341,13 +336,13 @@ mod test {
     }
 
     /*
-local _ = `hi, it's me!`
-local _ = "hi, it's me!"
-local _ = "hi, it's me!"
-local _ = [[
-    hi, it's me!
-]]
- */
+    local _ = `hi, it's me!`
+    local _ = "hi, it's me!"
+    local _ = "hi, it's me!"
+    local _ = [[
+        hi, it's me!
+    ]]
+     */
 
     #[test]
     fn string_formatting_1() {
@@ -356,12 +351,18 @@ local _ = [[
 
     #[test]
     fn string_formatting_2() {
-        test_strings!(r#""Escaped quotes are like \"this!\"""#, r#""Escaped quotes are like \"this!\"""#)
+        test_strings!(
+            r#""Escaped quotes are like \"this!\"""#,
+            r#""Escaped quotes are like \"this!\"""#
+        )
     }
 
     #[test]
     fn string_formatting_3() {
-        test_strings!(r#"'Escaped quotes are like "this!"'"#, r#"'Escaped quotes are like "this!"'"#)
+        test_strings!(
+            r#"'Escaped quotes are like "this!"'"#,
+            r#"'Escaped quotes are like "this!"'"#
+        )
     }
 
     #[test]
