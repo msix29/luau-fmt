@@ -224,13 +224,13 @@ impl FormatWithArgs<(&str, &str)> for Table {
         indentation: &mut i32,
         (key_value_separator, fields_separator): (&str, &str),
     ) -> String {
-        let len = self.fields.items.len();
+        let len = self.fields.len();
         if len == 0 {
             String::from("{}")
         } else if len == 1 {
             format!(
                 "{{ {} }}",
-                self.fields.items[0].format_with_args(indentation, key_value_separator)
+                self.fields[0].format_with_args(indentation, key_value_separator)
             )
         } else {
             let spaces = TAB.repeat(*indentation as usize);
@@ -238,7 +238,6 @@ impl FormatWithArgs<(&str, &str)> for Table {
                 "{{\n{}{}{}\n{}}}",
                 spaces,
                 self.fields
-                    .items
                     .iter()
                     .map(|field| field.format_with_args(indentation, key_value_separator))
                     .collect::<Vec<String>>()

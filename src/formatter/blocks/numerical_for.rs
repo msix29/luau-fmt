@@ -1,6 +1,6 @@
 //! Implements formatting traits for numerical for loops.
 
-use luau_parser::types::{Expression, NumericalFor};
+use luau_parser::types::{Expression, NumericalFor, ParsedNumber};
 
 use crate::types::Format;
 
@@ -12,11 +12,19 @@ fn format_step(step: &Expression, indentation: &mut i32) -> String {
 impl Format for NumericalFor {
     fn format(&self, indentation: &mut i32) -> String {
         let step = if let Some(step) = &self.step {
-            if let Expression::Number(number) = step {
-                let n = number.word.parse::<isize>().unwrap();
-                if n == 1 {
-                    // If the step is 1, just exclude it.
-                    String::new()
+            if let Expression::Number(number) = &**step {
+                if let Ok(n) = number.parse() {
+                    let is_1 = match n {
+                        ParsedNumber::HexOrByte(n) => n == 1,
+                        ParsedNumber::Other(n) => n == 1.0,
+                    };
+                    
+                    if is_1 {
+                        // If the step is 1, just exclude it.
+                        String::new()
+                    } else {
+                        format_step(step, indentation)
+                    }
                 } else {
                     format_step(step, indentation)
                 }

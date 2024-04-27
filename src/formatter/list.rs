@@ -6,8 +6,7 @@ use crate::types::{Format, FormatWithArgs};
 
 impl<T: Format> FormatWithArgs<&str> for List<T> {
     fn format_with_args(&self, indentation: &mut i32, join_with: &str) -> String {
-        self.items
-            .iter()
+        self.iter()
             .map(|item| match item {
                 ListItem::Trailing { item, separator } => {
                     format!(
@@ -25,8 +24,7 @@ impl<T: Format> FormatWithArgs<&str> for List<T> {
 
 impl<P: Copy, T: FormatWithArgs<P>> FormatWithArgs<(&str, P)> for List<T> {
     fn format_with_args(&self, indentation: &mut i32, (join_with, parameter): (&str, P)) -> String {
-        self.items
-            .iter()
+        self.iter()
             .map(|item| match item {
                 ListItem::Trailing { item, separator } => {
                     format!(
