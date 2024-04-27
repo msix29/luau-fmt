@@ -6,7 +6,7 @@
 use lazy_static::lazy_static;
 use luau_parser::types::{
     ElseIfExpression, Expression, FunctionArguments, FunctionCall, FunctionCallInvoked, Number,
-    PrefixExp, SingleToken, StringLiteral, Table, TableAccess, TableAccessKey, TableAccessPrefix,
+    PrefixExp, Token, StringLiteral, Table, TableAccess, TableAccessKey, TableAccessPrefix,
     TableField, TableFieldValue, TableKey, Var,
 };
 use regex::Regex;
@@ -26,7 +26,7 @@ lazy_static! {
 }
 
 /// Formats a string and changes quote style if needed.
-pub(crate) fn format_string(string: &SingleToken, indentation: &mut i32) -> String {
+pub(crate) fn format_string(string: &Token, indentation: &mut i32) -> String {
     let formatted = string.format(indentation);
     if formatted.starts_with('`') || (formatted.starts_with('[') && formatted.contains('\n')) {
         // If it's an interpolated strings, don't do anything to it.
@@ -329,22 +329,13 @@ impl Format for ElseIfExpression {
 #[cfg(test)]
 mod test {
     use crate::formatter::expression::format_string;
-    use luau_parser::types::SingleToken;
+    use luau_parser::types::Token;
 
     macro_rules! test_strings {
         ($input:literal, $output:literal) => {
-            assert_eq!(format_string(&SingleToken::new($input), &mut 0), $output)
+            assert_eq!(format_string(&Token::new($input), &mut 0), $output)
         };
     }
-
-    /*
-    local _ = `hi, it's me!`
-    local _ = "hi, it's me!"
-    local _ = "hi, it's me!"
-    local _ = [[
-        hi, it's me!
-    ]]
-     */
 
     #[test]
     fn string_formatting_1() {
