@@ -163,6 +163,7 @@ impl Format for Expression {
                     )
                 }
             }
+            Expression::ERROR => unreachable!(),
         }
     }
 }
