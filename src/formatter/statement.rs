@@ -22,7 +22,6 @@ impl Format for Statement {
             Statement::FunctionCall(function_call) => function_call.format(indentation),
             Statement::LocalFunction(local_function) => local_function.format(indentation),
             Statement::GlobalFunction(global_function) => global_function.format(indentation),
-            Statement::Comment(comment) => comment.format(indentation),
         }
     }
 }

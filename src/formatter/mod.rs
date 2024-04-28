@@ -1,7 +1,6 @@
 //! Holds all implementations.
 
 mod blocks;
-mod comment;
 mod expression;
 mod functions;
 mod list;
