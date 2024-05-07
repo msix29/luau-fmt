@@ -11,7 +11,6 @@ impl Format for Token {
 }
 impl Format for Comment {
     fn format(&self, _: &mut i32) -> String {
-        //TODO
         self.0.to_string()
     }
 }
