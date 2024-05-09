@@ -20,8 +20,7 @@ pub trait FormatWithArgs<P> {
 /// A trait which represents that this struct can be expanded into multiple lines.
 pub trait Expand {
     /// Expand this struct into a multi-line string, if possible. Default implementation
-    /// just returns the string as-is. In most cases, the formatted string isn't
-    /// actually needed nor will be used, but it's passed in case.
+    /// just returns the string as-is.
     fn expand(&self, formatted_string: &str) -> String {
         formatted_string.to_string()
     }
