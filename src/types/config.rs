@@ -28,8 +28,9 @@ pub enum TableWrap {
     /// Always wrap the table to one line.
     Always,
 
-    /// Only wrap the table to one line if it has no explicit keys.
-    NoKeys,
+    /// Only wrap the table to one line if it's made of literals such as strings, numbers.
+    /// and booleans.
+    OnlyLiterals,
 
     /// Only wrap the table to one line if it's a single element.
     SingleElement,
