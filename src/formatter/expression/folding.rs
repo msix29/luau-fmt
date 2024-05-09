@@ -1,4 +1,4 @@
-//! Holds all implementations for expressions.
+//! Holds folding implementations for expressions.
 
 // Clippy is drunk.
 #![allow(clippy::invalid_regex)]
@@ -6,17 +6,16 @@
 use lazy_static::lazy_static;
 use luau_parser::types::{
     ElseIfExpression, Expression, FunctionArguments, FunctionCall, FunctionCallInvoked, Number,
-    PrefixExp, Token, StringLiteral, Table, TableAccess, TableAccessKey, TableAccessPrefix,
-    TableField, TableFieldValue, TableKey, Var,
+    PrefixExp, StringLiteral, Table, TableAccess, TableAccessKey, TableAccessPrefix, TableField,
+    TableFieldValue, TableKey, Token, Var,
 };
 use regex::Regex;
 
 use crate::{
+    formatter::CONFIG,
     types::{Format, FormatWithArgs, QuoteStyle},
     TAB,
 };
-
-use super::CONFIG;
 
 lazy_static! {
     static ref ESCAPED_QUOTE: Regex = Regex::new(r#"([^\\]((\\{2})+)?)\\'"#).unwrap();
@@ -328,7 +327,7 @@ impl Format for ElseIfExpression {
 
 #[cfg(test)]
 mod test {
-    use crate::formatter::expression::format_string;
+    use super::format_string;
     use luau_parser::types::Token;
 
     macro_rules! test_strings {
