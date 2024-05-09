@@ -1,7 +1,7 @@
 //! Holds all formatting trait implementation for expressions.
 
 mod folding;
-mod wrapping;
+mod expanding;
 
 pub(crate) use folding::*;
-pub(crate) use wrapping::*;
+pub(crate) use expanding::*;
