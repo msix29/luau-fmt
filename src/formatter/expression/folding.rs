@@ -12,9 +12,7 @@ use luau_parser::types::{
 use regex::Regex;
 
 use crate::{
-    formatter::CONFIG,
-    types::{Format, FormatWithArgs, QuoteStyle},
-    TAB,
+    formatter::CONFIG, types::{Format, FormatWithArgs, QuoteStyle}, panic_for_error_variant, TAB
 };
 
 lazy_static! {
@@ -181,6 +179,7 @@ impl Format for Var {
         match self {
             Var::Name(name) => name.format(indentation),
             Var::TableAccess(table_access) => table_access.format(indentation),
+            Var::ERROR => panic_for_error_variant!(),
         }
     }
 }
@@ -260,6 +259,7 @@ impl FormatWithArgs<&str> for TableField {
 impl FormatWithArgs<&str> for TableKey {
     fn format_with_args(&self, indentation: &mut i32, separator: &str) -> String {
         match self {
+            TableKey::ERROR => panic_for_error_variant!(),
             TableKey::UndefinedNumber(_) | TableKey::UndefinedString(_) => String::new(),
             TableKey::String(string) => format!("{}{}", string.format(indentation), separator),
             TableKey::Expression { expression, .. } => {
@@ -274,6 +274,7 @@ impl FormatWithArgs<&str> for TableKey {
 impl Format for TableFieldValue {
     fn format(&self, indentation: &mut i32) -> String {
         match self {
+            TableFieldValue::ERROR => panic_for_error_variant!(),
             TableFieldValue::Expression(expression) => expression.format(indentation),
             TableFieldValue::Type(r#type) => r#type.format(indentation),
         }

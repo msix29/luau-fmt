@@ -5,7 +5,7 @@ use luau_parser::types::{
     GenericParameterInfoDefault, TypeDefinition, TypeValue,
 };
 
-use crate::types::{Format, FormatWithArgs};
+use crate::{panic_for_error_variant, types::{Format, FormatWithArgs}};
 
 use super::expression::format_string;
 
@@ -118,6 +118,7 @@ impl Format for GenericDeclarationParameter {
 impl Format for GenericParameterInfo {
     fn format(&self, indentation: &mut i32) -> String {
         match self {
+            GenericParameterInfo::ERROR => panic_for_error_variant!(),
             GenericParameterInfo::Name(name) => name.format(indentation),
             GenericParameterInfo::Pack { name, .. } => format!("{}...", name.format(indentation)),
         }

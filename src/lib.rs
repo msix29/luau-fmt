@@ -27,4 +27,5 @@ pub(crate) const TAB: &str = "    ";
 
 mod config;
 pub mod formatter;
+mod macros;
 pub mod types;

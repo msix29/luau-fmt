@@ -10,11 +10,11 @@ impl Format for IfStatement {
             "if {} then\n{}{}{}{}end",
             self.condition.format(indentation),
             self.body.format(&mut (*indentation + 1)),
-            self.else_if_expressions
+            self.else_if_statements
                 .iter()
                 .map(|else_if_expression| else_if_expression.format(indentation))
                 .collect::<String>(),
-            self.else_expression
+            self.else_statement
                 .as_ref()
                 .map_or_else(String::new, |else_expression| else_expression
                     .format(indentation)),
