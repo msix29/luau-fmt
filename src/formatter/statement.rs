@@ -2,11 +2,12 @@
 
 use luau_parser::types::Statement;
 
-use crate::types::Format;
+use crate::{panic_for_error_variant, types::Format};
 
 impl Format for Statement {
     fn format(&self, indentation: &mut i32) -> String {
         match self {
+            Statement::ERROR => panic_for_error_variant!(),
             Statement::LocalAssignment(local_assignment) => local_assignment.format(indentation),
             Statement::TypeDefinition(type_definition) => type_definition.format(indentation),
             Statement::IfStatement(if_statement) => if_statement.format(indentation),

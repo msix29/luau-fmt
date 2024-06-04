@@ -12,7 +12,10 @@ use luau_parser::types::{
 use regex::Regex;
 
 use crate::{
-    formatter::CONFIG, types::{Format, FormatWithArgs, QuoteStyle}, panic_for_error_variant, TAB
+    formatter::CONFIG,
+    panic_for_error_variant,
+    types::{Format, FormatWithArgs, QuoteStyle},
+    TAB,
 };
 
 lazy_static! {
@@ -21,6 +24,8 @@ lazy_static! {
     static ref ESCAPED_DOUBLE_QUOTE: Regex = Regex::new(r#"([^\\]((\\{2})+)?)\\""#).unwrap();
     static ref DOUBLE_QUOTE: Regex = Regex::new(r#"((\\{2})+)?""#).unwrap();
 }
+/// The special Luau escape sequence (`\z`) that ignores all spaces after it.
+const SPACE_ESCAPE: &str = r"\z";
 
 /// Formats a string and changes quote style if needed.
 pub(crate) fn format_string(string: &Token, indentation: &mut i32) -> String {
@@ -31,37 +36,68 @@ pub(crate) fn format_string(string: &Token, indentation: &mut i32) -> String {
         return formatted;
     }
     let stripped_formatted = StringLiteral::strip_delimiters(&formatted);
+    let mut final_string = None;
+    let config = CONFIG.read().unwrap();
 
-    match CONFIG.read().unwrap().quote_style {
+    match config.quote_style {
         QuoteStyle::Single => {
-            return format!("'{}'", QUOTE.replace_all(&stripped_formatted, "\\'"))
+            final_string = Some(format!(
+                "'{}'",
+                QUOTE.replace_all(&stripped_formatted, "\\'")
+            ));
         }
         QuoteStyle::PreferSingle => {
             if !QUOTE.is_match(&stripped_formatted) {
-                return format!(
+                final_string = Some(format!(
                     "'{}'",
                     ESCAPED_DOUBLE_QUOTE.replace_all(&stripped_formatted, "$1\"")
-                );
+                ));
             }
         }
         QuoteStyle::Double => {
-            return format!(r#""{}""#, QUOTE.replace_all(&stripped_formatted, r#"\\""#))
+            final_string = Some(format!(
+                r#""{}""#,
+                QUOTE.replace_all(&stripped_formatted, r#"\\""#)
+            ));
         }
         QuoteStyle::PreferDouble => {
             if !DOUBLE_QUOTE.is_match(&stripped_formatted) {
-                return format!(
+                final_string = Some(format!(
                     r#""{}""#,
                     ESCAPED_QUOTE.replace_all(&stripped_formatted, "$1'")
-                );
+                ));
             }
         }
     };
 
-    formatted
+    let final_string = final_string.unwrap_or(formatted);
+
+    let max_string_width = config.string_width as usize;
+    let num_insertions = final_string.len() / max_string_width;
+    let result_len = final_string.len() + num_insertions * SPACE_ESCAPE.len();
+
+    let mut result = String::with_capacity(result_len);
+    let mut char_count = 0;
+    let indentation_string = TAB.repeat((*indentation + 1) as usize);
+
+    for str in final_string.split_inclusive(' ') {
+        char_count += str.len();
+
+        if char_count > max_string_width {
+            result.push_str(&format!("{}\n{}", SPACE_ESCAPE, indentation_string));
+            char_count = 0;
+        }
+        
+        result.push_str(str);
+    }
+
+    result
 }
 
 impl Format for Expression {
     fn format(&self, indentation: &mut i32) -> String {
+        let config = CONFIG.read().unwrap();
+
         match self {
             Expression::Nil(value)
             | Expression::Boolean(value)
@@ -74,16 +110,34 @@ impl Format for Expression {
                 returns,
                 body,
                 ..
-            } => format!(
-                "function{}({}){}{}\n{}end",
-                generics.format_with_args(indentation, ""),
-                parameters.format_with_args(indentation, " "),
-                colon.as_ref().map_or_else(|| "", |_| ": "),
-                returns
-                    .as_ref()
-                    .map_or_else(String::new, |returns| returns.format(indentation)),
-                body.format(&mut (*indentation + 1)),
-            ),
+            } => {
+                let mut start = format!(
+                    "function{}({}){}{}",
+                    generics.format_with_args(indentation, ""),
+                    parameters.format_with_args(indentation, " "),
+                    colon.as_ref().map_or_else(|| "", |_| ": "),
+                    returns
+                        .as_ref()
+                        .map_or_else(String::new, |returns| returns.format(indentation)),
+                );
+
+                if start.len() > config.column_width as usize {
+                    let indentation_string = TAB.repeat((*indentation + 1) as usize);
+                    start = format!(
+                        "function{}(\n{}{}\n){}{}",
+                        generics.format_with_args(indentation, ""),
+                        indentation_string,
+                        parameters
+                            .format_with_args(indentation, &format!("\n{}", indentation_string)),
+                        colon.as_ref().map_or_else(|| "", |_| ": "),
+                        returns
+                            .as_ref()
+                            .map_or_else(String::new, |returns| returns.format(indentation)),
+                    );
+                }
+
+                format!("{}\n{}end", start, body.format(&mut (*indentation + 1)))
+            }
             Expression::FunctionCall(funcion_call) => funcion_call.format(indentation),
             Expression::ExpressionWrap(wrap) => {
                 format!("({})", wrap.expression.format(indentation))
@@ -160,7 +214,7 @@ impl Format for Expression {
                     )
                 }
             }
-            Expression::ERROR => unreachable!(),
+            Expression::ERROR => panic_for_error_variant!(),
         }
     }
 }

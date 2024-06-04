@@ -80,7 +80,7 @@ impl Format for TypeValue {
                 format!("...{}", type_info.format(indentation))
             }
             TypeValue::VariadicPack { name, .. } => format!("...{}", name.format(indentation)),
-            TypeValue::ERROR => unreachable!(),
+            TypeValue::ERROR => panic_for_error_variant!(),
         }
     }
 }

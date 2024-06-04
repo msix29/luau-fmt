@@ -45,6 +45,9 @@ pub struct Config {
     /// The maximum width of characters per line.
     pub column_width: u32,
 
+    /// The maximum width of a string per line.
+    pub string_width: u32,
+
     /// The maximum width of characters in a comment per line.
     pub comments_width: u32,
 
