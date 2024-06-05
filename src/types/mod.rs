@@ -16,14 +16,3 @@ pub trait FormatWithArgs<P> {
     /// Format this struct into a string.
     fn format_with_args(&self, indentation: &mut i32, parameter: P) -> String;
 }
-
-/// A trait which represents that this struct can be expanded into multiple lines.
-pub trait Expand {
-    /// Expand this struct into a multi-line string, if possible. Default implementation
-    /// just returns [`None`], which will make the code fallback for the formatted
-    /// version with no expanding.
-    fn expand(&self, indentation: &mut i32) -> Option<String> {
-        let _ = indentation;
-        None
-    }
-}
