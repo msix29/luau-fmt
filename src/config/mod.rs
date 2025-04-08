@@ -60,6 +60,8 @@ pub struct Config {
 
     /// Whether or not to have a newline at the end of the file.
     pub add_final_newline: bool,
+
+    //TODO: Sorting `require` and `game:GetService` calls.
 }
 
 impl Default for Config {
