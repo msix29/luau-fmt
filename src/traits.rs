@@ -1,16 +1,12 @@
 //! Module holding all types used by this crate, and optionally by others.
 
-mod config;
-
-pub use config::*;
-
 /// A trait which represents that this struct can be formatted.
 pub trait Format {
     /// Format this struct into a string.
     fn format(&self, indentation: &mut i32) -> String;
 }
 
-/// A trait which represents that this struct can be formatted but accepts args to
+/// A trait which represents that this struct can be formatted, the passed arguments
 /// customize the end result.
 pub trait FormatWithArgs<P> {
     /// Format this struct into a string.
