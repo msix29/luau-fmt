@@ -1,0 +1,12 @@
+#[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub enum TrailingCommas {
+    /// Always have trailing commas.
+    Always,
+
+    /// Never have trailing commas.
+    Never,
+
+    /// Only have trailing commas in multi-line tables.
+    #[default]
+    OnlyMultiLine,
+}

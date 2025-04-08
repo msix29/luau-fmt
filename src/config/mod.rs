@@ -8,7 +8,14 @@ macro_rules! reexport {
     };
 }
 
-reexport!(quote_style, compact_table);
+reexport!(
+    quote_style,
+    compact_table,
+    indent_style,
+    newline_style,
+    trailing_commas,
+    semicolon,
+);
 
 /// Struct representing the config file.
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
@@ -27,6 +34,32 @@ pub struct Config {
 
     /// When to use compact table format (be one line).
     pub compact_table: CompactTable,
+
+    /// Whether to use spaces or tabs.
+    pub indent_style: IndentStyle,
+
+    /// Number of spaces per tab (if [`Config::indent_style`] is
+    /// [`IndentStyle::Spaces`]).
+    pub indent_size: IndentSize,
+
+    /// Whether to use CRLF, LF, or CR line endings.
+    pub newline_style: NewLineStyle,
+
+    /// When to have trailing commas in tables
+    pub trailing_commas: TrailingCommas,
+
+    /// Whether or not to keep the spacing between statements and not decrease it
+    /// to a maximum of 1 line.
+    pub keep_statements_spacing: bool,
+
+    /// When to have `;` after statements.
+    pub semicolon: Semicolon,
+
+    /// Whether or not to trim lines.
+    pub trim_lines: bool,
+
+    /// Whether or not to have a newline at the end of the file.
+    pub add_final_newline: bool,
 }
 
 impl Default for Config {
@@ -35,8 +68,23 @@ impl Default for Config {
             column_width: 100,
             string_width: 60,
             comments_width: 80,
-            quote_style: QuoteStyle::PreferDouble,
-            compact_table: CompactTable::SingleElement,
+
+            quote_style: Default::default(),
+
+            compact_table: Default::default(),
+
+            indent_style: Default::default(),
+            indent_size: 4,
+
+            newline_style: Default::default(),
+
+            trailing_commas: Default::default(),
+
+            keep_statements_spacing: false,
+            semicolon: Default::default(),
+
+            trim_lines: true,
+            add_final_newline: true,
         }
     }
 }
