@@ -27,6 +27,6 @@ pub fn format_with_config(cst: &Cst, config: &Config) -> Result<String, Formatti
     if cst.has_errors() {
         Err(FormattingError::ErroneousCst)
     } else {
-        Ok(cst.block.format(&mut 0, config))
+        Ok(cst.block.format(0, config))
     }
 }
