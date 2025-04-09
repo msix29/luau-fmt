@@ -15,5 +15,5 @@ pub trait Format {
 /// customize the end result.
 pub trait FormatWithArgs<P> {
     /// Format this struct into a string.
-    fn format_with_args(&self, indentation: Indentation, config: &Config, parameter: P) -> String;
+    fn format_with_args(&self, indentation: Indentation, config: &Config, args: P) -> String;
 }
