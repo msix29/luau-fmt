@@ -15,6 +15,7 @@ reexport!(
     newline_style,
     trailing_commas,
     semicolon,
+    naming_convention,
 );
 
 /// Struct representing the config file.
@@ -61,6 +62,9 @@ pub struct Config {
     /// Whether or not to have a newline at the end of the file.
     pub add_final_newline: bool,
 
+    pub variable_casing: NamingConvention,
+    pub method_casing: NamingConvention,
+
     //TODO: Sorting `require` and `game:GetService` calls.
 }
 
@@ -87,6 +91,9 @@ impl Default for Config {
 
             trim_lines: true,
             add_final_newline: true,
+
+            variable_casing: NamingConvention::Camel,
+            method_casing: NamingConvention::Pascal,
         }
     }
 }

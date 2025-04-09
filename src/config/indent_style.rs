@@ -1,5 +1,9 @@
 //! [`IndentStyle`] enum.
 
+use crate::traits::Indentation;
+
+use super::Config;
+
 /// Number of spaces that represent a tab
 pub type IndentSize = usize;
 
@@ -12,4 +16,14 @@ pub enum IndentStyle {
 
     /// One tab (`\t`) per indentation.
     Tabs,
+}
+
+impl IndentStyle {
+    #[inline]
+    pub fn to_string(self, indentation: Indentation, config: &Config) -> String {
+        match self {
+            IndentStyle::Spaces => " ".repeat(config.indent_size * indentation as usize),
+            IndentStyle::Tabs => "\t".repeat(indentation as usize),
+        }
+    }
 }
