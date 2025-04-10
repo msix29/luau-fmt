@@ -9,7 +9,7 @@
 
 use luau_parser::types::{GenericDeclarationParameter, GenericParameterInfo, GenericParameterInfoDefault, ParameterTypeName, TypeDefinition, TypeValue};
 
-use crate::{config::Config, traits::{Format, Indentation}};
+use crate::{config::Config, formatter::TokenFormatType, traits::{Format, FormatWithArgs, Indentation}};
 
 impl Format for TypeValue {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
@@ -31,7 +31,7 @@ impl Format for TypeDefinition {
             "type ".to_string()
         };
 
-        string.push_str(&self.type_name.format(indentation, config));
+        string.push_str(&self.type_name.format_with_args(indentation, config, TokenFormatType::Type));
         string.push_str(&self.generics.format_with_args(indentation, config, ""));
         string.push_str(" = ");
         string.push_str(&self.type_value.format(indentation, config));
