@@ -8,6 +8,7 @@ use luau_parser::types::{GlobalFunction, GlobalFunctionName, LocalFunction};
 
 use crate::{
     config::Config,
+    formatter::TokenFormatType,
     traits::{Format, FormatWithArgs, Indentation},
 };
 
@@ -30,7 +31,11 @@ impl Format for GlobalFunctionName {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         match self {
             GlobalFunctionName::SimpleName(token) => token.format(indentation, config),
-            GlobalFunctionName::Table { table, keys, method } => {
+            GlobalFunctionName::Table {
+                table,
+                keys,
+                method,
+            } => {
                 let mut string = table.format(indentation, config);
 
                 for key in keys.iter() {
@@ -39,11 +44,15 @@ impl Format for GlobalFunctionName {
 
                 if let Some(method) = method {
                     string.push(':');
-                    string.push_str(&method.1.format(indentation, config));
+                    string.push_str(&method.1.format_with_args(
+                        indentation,
+                        config,
+                        TokenFormatType::Method,
+                    ));
                 }
 
                 string
-            },
+            }
         }
     }
 }

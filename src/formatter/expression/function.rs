@@ -12,20 +12,29 @@ use luau_parser::types::{
 
 use crate::{
     config::Config,
-    traits::{Format, Indentation},
+    formatter::TokenFormatType,
+    traits::{Format, FormatWithArgs, Indentation},
 };
 
 impl Format for FunctionCallInvoked {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         match self {
             FunctionCallInvoked::Function(prefix_exp) => prefix_exp.format(indentation, config),
-            FunctionCallInvoked::TableMethod { table, colon, method } => {
+            FunctionCallInvoked::TableMethod {
+                table,
+                colon,
+                method,
+            } => {
                 let mut string = table.format(indentation, config);
                 string.push(';');
-                string.push_str(&method.format(indentation, config));
+                string.push_str(&method.format_with_args(
+                    indentation,
+                    config,
+                    TokenFormatType::Method,
+                ));
 
                 string
-            },
+            }
         }
     }
 }
