@@ -23,14 +23,14 @@ impl Format for Block {
         }
 
         for (statement, semicolon) in self.statements.iter() {
-            formatted_code += &statement.format(indentation, config);
+            formatted_code.push_str(&statement.format(indentation, config));
 
             match config.semicolon {
                 Semicolon::Keep => {
-                    formatted_code += &semicolon.format(indentation, config);
+                    formatted_code.push_str(&semicolon.format(indentation, config));
                 }
                 Semicolon::Always if semicolon.is_some() => {
-                    formatted_code += &semicolon.format(indentation, config);
+                    formatted_code.push_str(&semicolon.format(indentation, config));
                 }
                 Semicolon::Always => {
                     let ending_spaces = if config.keep_statements_spacing {
@@ -46,15 +46,15 @@ impl Format for Block {
                         config.newline_style.to_string()
                     };
 
-                    formatted_code += ";";
-                    formatted_code += &ending_spaces;
+                    formatted_code.push(';');
+                    formatted_code.push_str(&ending_spaces);
                 }
                 _ => (),
             }
         }
 
         if config.add_final_newline {
-            formatted_code += config.newline_style.as_str();
+            formatted_code.push_str(config.newline_style.as_str());
         }
 
         formatted_code
