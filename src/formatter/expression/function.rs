@@ -40,20 +40,34 @@ impl Format for FunctionCallInvoked {
 }
 
 impl Format for FunctionCall {
+    #[inline]
     fn format(&self, indentation: Indentation, config: &Config) -> String {
-        todo!()
+        self.invoked.format(indentation, config) + &self.arguments.format(indentation, config)
     }
 }
 
 impl Format for FunctionArguments {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
-        todo!()
+        match self {
+            FunctionArguments::String(token) => {
+                " ".to_string() + &token.format(indentation, config)
+            }
+            FunctionArguments::Table(table) => {
+                " ".to_string() + &table.format_with_args(indentation, config, false)
+            }
+            FunctionArguments::List(bracketed) => {
+                bracketed.format_with_args(indentation, config, " ")
+            }
+        }
     }
 }
 
 impl Format for FunctionArgument {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
-        todo!()
+        match self {
+            FunctionArgument::Expression(expression) => expression.format(indentation, config),
+            FunctionArgument::VariadicValues(_) => "...".to_string(),
+        }
     }
 }
 
