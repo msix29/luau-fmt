@@ -24,11 +24,18 @@ impl Format for LuauString {
     }
 }
 
-impl Format for Token {
-    fn format(&self, indentation: Indentation, config: &Config) -> String {
+impl FormatWithArgs<bool> for Token {
+    fn format_with_args(&self, indentation: Indentation, config: &Config, is_method_name: bool) -> String {
         match &self.token_type {
             TokenType::Literal(Literal::String(luau_string)) => {
                 luau_string.format(indentation, config)
+            }
+            TokenType::Identifier(identifier) => {
+                if is_method_name {
+                    config.method_casing.apply(&identifier)
+                } else {
+                    config.variable_casing.apply(&identifier)
+                }
             }
 
             // `unwrap` itself is safe and should never error as this will only be
@@ -36,6 +43,13 @@ impl Format for Token {
             // before starting any of the formatting.
             token_type => token_type.try_as_string().unwrap_or_default(),
         }
+    }
+}
+
+impl Format for Token {
+    #[inline]
+    fn format(&self, indentation: Indentation, config: &Config) -> String {
+        self.format_with_args(indentation, config, false)
     }
 }
 
