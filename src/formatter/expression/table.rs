@@ -8,7 +8,8 @@ use luau_parser::types::{TableAccess, TableAccessKey, TableAccessPrefix};
 
 use crate::{
     config::Config,
-    traits::{Format, Indentation},
+    formatter::TokenFormatType,
+    traits::{Format, FormatWithArgs, Indentation},
 };
 
 impl Format for TableAccessPrefix {
@@ -28,7 +29,8 @@ impl Format for TableAccessKey {
         match self {
             TableAccessKey::Expression(table_key) => table_key.format(indentation, config),
             TableAccessKey::Name { name, .. } => {
-                ".".to_string() + &name.format(indentation, config)
+                //FIXME: What if this is a method?
+                ".".to_string() + &name.format_with_args(indentation, config, TokenFormatType::Name)
             }
         }
     }
