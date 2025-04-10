@@ -18,7 +18,7 @@ impl Format for PrefixExp {
             PrefixExp::Var(var) => var.format(indentation, config),
             PrefixExp::FunctionCall(function_call) => function_call.format(indentation, config),
             PrefixExp::ExpressionWrap(bracketed) => {
-                bracketed.format_with_args(indentation, config, "")
+                bracketed.format_with_args(indentation, config, " ")
             }
         }
     }
