@@ -64,6 +64,7 @@ pub struct Config {
 
     pub variable_casing: NamingConvention,
     pub method_casing: NamingConvention,
+    pub type_casing: NamingConvention,
 
     //TODO: Sorting `require` and `game:GetService` calls.
 }
@@ -94,6 +95,7 @@ impl Default for Config {
 
             variable_casing: NamingConvention::Camel,
             method_casing: NamingConvention::Pascal,
+            type_casing: NamingConvention::Pascal,
         }
     }
 }

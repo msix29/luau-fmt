@@ -24,17 +24,40 @@ impl Format for LuauString {
     }
 }
 
-impl FormatWithArgs<bool> for Token {
-    fn format_with_args(&self, indentation: Indentation, config: &Config, is_method_name: bool) -> String {
+/// Whether the formatted token is one of the passed ones.
+#[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub enum TokenFormatType {
+    /// A type name.
+    Type,
+
+    /// A method name.
+    Method,
+
+    /// A variable name.
+    Name,
+
+    /// Not even a name.
+    #[default]
+    None,
+}
+
+impl FormatWithArgs<TokenFormatType> for Token {
+    fn format_with_args(
+        &self,
+        indentation: Indentation,
+        config: &Config,
+        token_format_type: TokenFormatType,
+    ) -> String {
         match &self.token_type {
             TokenType::Literal(Literal::String(luau_string)) => {
                 luau_string.format(indentation, config)
             }
             TokenType::Identifier(identifier) => {
-                if is_method_name {
-                    config.method_casing.apply(&identifier)
-                } else {
-                    config.variable_casing.apply(&identifier)
+                match token_format_type {
+                    TokenFormatType::Type => config.type_casing.apply(&identifier),
+                    TokenFormatType::Method => config.method_casing.apply(&identifier),
+                    TokenFormatType::Name => config.variable_casing.apply(&identifier),
+                    TokenFormatType::None => unreachable!(),
                 }
             }
 
@@ -49,7 +72,7 @@ impl FormatWithArgs<bool> for Token {
 impl Format for Token {
     #[inline]
     fn format(&self, indentation: Indentation, config: &Config) -> String {
-        self.format_with_args(indentation, config, false)
+        self.format_with_args(indentation, config, TokenFormatType::None)
     }
 }
 
