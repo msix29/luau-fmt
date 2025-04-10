@@ -22,14 +22,14 @@ use crate::{
 
 impl Format for Block {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
-        let mut formatted_code = String::new();
+        let mut formatted_code =
+            config.newline_style.to_string() + &config.indent_style.to_string(indentation, config);
 
         if self.is_empty() {
             // We add a newline with the correct indentation if this isn't the
             // main block.
             if indentation != 0 {
-                return config.newline_style.to_string()
-                    + &config.indent_style.to_string(indentation, config);
+                return formatted_code;
             } else {
                 return "".to_string();
             }

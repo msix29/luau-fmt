@@ -26,6 +26,8 @@ pub fn format(cst: &Cst) -> Result<String, FormattingError> {
 pub fn format_with_config(cst: &Cst, config: &Config) -> Result<String, FormattingError> {
     if cst.has_errors() {
         Err(FormattingError::ErroneousCst)
+    } else if cst.block.is_empty() {
+        Ok("".to_string())
     } else {
         Ok(cst.block.format(0, config))
     }
