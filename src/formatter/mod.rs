@@ -1,3 +1,12 @@
+//! All `impl` blocks for CST-related types.
+
+mod block;
+mod bracketed;
+mod expression;
+mod list;
+mod name;
+mod value;
+
 use luau_parser::{
     prelude::{Literal, LuauString, Token, TokenType},
     types::Pointer,
@@ -7,8 +16,6 @@ use crate::{
     config::Config,
     traits::{Format, FormatWithArgs, Indentation},
 };
-
-mod block;
 
 impl Format for LuauString {
     fn format(&self, _indentation: Indentation, config: &Config) -> String {
