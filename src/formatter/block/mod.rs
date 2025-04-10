@@ -38,6 +38,11 @@ impl Format for Block {
         for (statement, semicolon) in self.statements.iter() {
             formatted_code.push_str(&statement.format(indentation, config));
 
+            let trimmed = formatted_code.trim_end();
+            let spaces = formatted_code[trimmed.len()..].to_string();
+
+            let new_lines = spaces.matches('\n').count();
+
             match config.semicolon {
                 Semicolon::Keep => {
                     formatted_code.push_str(&semicolon.format(indentation, config));
@@ -47,16 +52,19 @@ impl Format for Block {
                 }
                 Semicolon::Always => {
                     let ending_spaces = if config.keep_statements_spacing {
-                        let trimmed = formatted_code.trim_end();
-                        let spaces = formatted_code[trimmed.len()..].to_string();
-
                         formatted_code = trimmed.to_string();
 
                         spaces
                     } else {
-                        formatted_code = formatted_code.trim_end().to_string();
+                        formatted_code = trimmed.to_string();
 
-                        config.newline_style.to_string()
+                        if new_lines > 2 {
+                            // Maximum of 2 new lines (1 empty line) if we
+                            // don't preserve user spacing.
+                            config.newline_style.to_string().repeat(2)
+                        } else {
+                            config.newline_style.to_string()
+                        }
                     };
 
                     formatted_code.push(';');

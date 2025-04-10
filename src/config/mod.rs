@@ -50,7 +50,7 @@ pub struct Config {
     pub trailing_commas: TrailingCommas,
 
     /// Whether or not to keep the spacing between statements and not decrease it
-    /// to a maximum of 1 line.
+    /// to a maximum of 2 lines (1 empty line).
     pub keep_statements_spacing: bool,
 
     /// When to have `;` after statements.
