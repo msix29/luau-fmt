@@ -7,9 +7,16 @@
 //! * [`GenericDeclarationParameter`]
 //! * [`GenericParameterInfoDefault`]
 
-use luau_parser::types::{GenericDeclarationParameter, GenericParameterInfo, GenericParameterInfoDefault, ParameterTypeName, TypeDefinition, TypeValue};
+use luau_parser::types::{
+    GenericDeclarationParameter, GenericParameterInfo, GenericParameterInfoDefault,
+    ParameterTypeName, TypeDefinition, TypeValue,
+};
 
-use crate::{config::Config, formatter::TokenFormatType, traits::{Format, FormatWithArgs, Indentation}};
+use crate::{
+    config::Config,
+    formatter::TokenFormatType,
+    traits::{Format, FormatWithArgs, Indentation},
+};
 
 impl Format for TypeValue {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
@@ -26,14 +33,24 @@ impl Format for ParameterTypeName {
 impl Format for TypeDefinition {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         let mut string = if self.export_keyword.is_some() {
-            "export type ".to_string()
+            let mut string = self.export_keyword.format(indentation, config);
+            string.push(' ');
+            string
         } else {
-            "type ".to_string()
+            "".to_string()
         };
 
-        string.push_str(&self.type_name.format_with_args(indentation, config, TokenFormatType::Type));
+        string.push_str(&self.type_keyword.format(indentation, config));
+        string.push(' ');
+        string.push_str(&self.type_name.format_with_args(
+            indentation,
+            config,
+            TokenFormatType::Type,
+        ));
         string.push_str(&self.generics.format_with_args(indentation, config, ""));
-        string.push_str(" = ");
+        string.push(' ');
+        string.push_str(&self.equal_sign.format(indentation, config));
+        string.push(' ');
         string.push_str(&self.type_value.format(indentation, config));
 
         string
@@ -57,4 +74,3 @@ impl Format for GenericParameterInfoDefault {
         todo!()
     }
 }
-

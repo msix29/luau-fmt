@@ -9,7 +9,8 @@ use crate::{
 
 impl Format for WhileLoop {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
-        let mut string = "while ".to_string();
+        let mut string = self.while_keyword.format(indentation, config);
+        string.push(' ');
         string.push_str(&self.condition.format(indentation, config));
         string.push(' ');
         string.push_str(&self.do_block.format(indentation, config));

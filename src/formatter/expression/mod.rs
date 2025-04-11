@@ -63,16 +63,21 @@ impl Format for Expression {
 
 impl Format for IfExpression {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
-        let mut string = "if ".to_string();
+        let mut string = self.if_keyword.format(indentation, config);
+        string.push(' ');
         string.push_str(&self.condition.format(indentation, config));
-        string.push_str(" then");
+        string.push(' ');
+        string.push_str(&self.then_keyword.format(indentation, config));
+        string.push(' ');
         string.push_str(&self.if_expression.format(indentation, config));
 
         for else_if in self.else_if_expressions.iter() {
             string.push_str(&else_if.format(indentation, config));
         }
 
-        string.push_str(" else ");
+        string.push(' ');
+        string.push_str(&self.else_keyword.format(indentation, config));
+        string.push(' ');
         string.push_str(&self.else_expression.format(indentation, config));
 
         string
@@ -81,9 +86,13 @@ impl Format for IfExpression {
 
 impl Format for ElseIfExpression {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
-        let mut string = " elseif ".to_string();
+        let mut string = " ".to_string();
+        string.push_str(&self.else_if_keyword.format(indentation, config));
+        string.push(' ');
         string.push_str(&self.condition.format(indentation, config));
-        string.push_str(" then ");
+        string.push(' ');
+        string.push_str(&self.then_keyword.format(indentation, config));
+        string.push(' ');
         string.push_str(&self.expression.format(indentation, config));
 
         string

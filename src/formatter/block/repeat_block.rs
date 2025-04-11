@@ -9,9 +9,10 @@ use crate::{
 
 impl Format for RepeatBlock {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
-        let mut string = "repeat".to_string();
+        let mut string = self.repeat_keyword.format(indentation, config);
         string.push_str(&self.body.format(indentation + 1, config));
-        string.push_str("until ");
+        string.push_str(&self.until_keyword.format(indentation, config));
+        string.push(' ');
         string.push_str(&self.condition.format(indentation, config));
 
         string
