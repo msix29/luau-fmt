@@ -5,7 +5,7 @@
 // #![warn(missing_docs)]
 #![warn(clippy::absolute_paths)]
 
-use config::Config;
+pub use config::Config;
 use luau_parser::types::Cst;
 use traits::Format;
 
