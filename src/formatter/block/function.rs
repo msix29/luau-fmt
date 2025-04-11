@@ -7,7 +7,7 @@
 //! * [`TypeFunction`]
 
 use luau_parser::types::{
-    GlobalFunction, GlobalFunctionName, LocalFunction, Parameter, TypeFunction,
+    Attribute, GlobalFunction, GlobalFunctionName, LocalFunction, Parameter, TypeFunction,
 };
 
 use crate::{
@@ -18,7 +18,8 @@ use crate::{
 
 impl Format for LocalFunction {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
-        let mut string = "local function ".to_string();
+        let mut string = self.attributes.format(indentation, config);
+        string.push_str("local function ");
         string.push_str(&self.function_name.format(indentation, config));
         string.push_str(&self.parameters.format_with_args(indentation, config, " "));
         string.push_str(&self.colon.format(indentation, config));
@@ -63,7 +64,8 @@ impl Format for GlobalFunctionName {
 
 impl Format for GlobalFunction {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
-        let mut string = "function ".to_string();
+        let mut string = self.attributes.format(indentation, config);
+        string.push_str("function ");
         string.push_str(&self.function_name.format(indentation, config));
         string.push_str(&self.parameters.format_with_args(indentation, config, " "));
         string.push_str(&self.colon.format(indentation, config));
@@ -73,6 +75,23 @@ impl Format for GlobalFunction {
         string.push_str("end");
 
         string
+    }
+}
+
+impl Format for Attribute {
+    #[inline]
+    fn format(&self, indentation: Indentation, config: &Config) -> String {
+        "@".to_string()
+            + &self
+                .attribute
+                .format_with_args(indentation, config, TokenFormatType::Name)
+    }
+}
+impl Format for Vec<Attribute> {
+    fn format(&self, indentation: Indentation, config: &Config) -> String {
+        self.iter().fold("".to_string(), |str, item| {
+            str + &item.format(indentation, config) + "\n"
+        })
     }
 }
 
