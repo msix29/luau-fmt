@@ -32,9 +32,9 @@ const DOUBLE_QUOTE: &str = r#"""#;
 
 macro_rules! convert {
     ($str: ident, $quotes: ident, $(($from:ident => $to:ident)),* $(,)?) => {{
-        let mut string = $quotes.to_string();
-        string.push_str(&$str $(.replace($from, $to))*);
-        string.push_str($quotes);
+        let mut string = $str $(.replace($from, $to))*;
+        string.replace_range(..1, $quotes);
+        string.replace_range(string.len() - 1.., $quotes);
         string
     }};
 }
@@ -48,9 +48,7 @@ fn count_escapes(string: &str) -> usize {
     let mut escapes = 0;
 
     while i < end {
-        // We don't have to check for `\` as we know this is a valid string.
-        // So if we meet any quotes, that means they're escaped.
-        if bytes[i] == b'\'' || bytes[i] == b'"' {
+        if bytes[i - 1] == b'\\' && (bytes[i] == b'\'' || bytes[i] == b'"') {
             escapes += 1;
         }
 
@@ -73,14 +71,19 @@ impl QuoteStyle {
                 LuauString::SingleQuotes(smol_str) => smol_str.to_string(),
                 LuauString::DoubleQuotes(smol_str) => convert!(
                     smol_str,
-                    DOUBLE_QUOTE,
-                    (ESCAPED_QUOTE => QUOTE),
-                    (DOUBLE_QUOTE => ESCAPED_DOUBLE_QUOTE)
+                    QUOTE,
+                    (ESCAPED_DOUBLE_QUOTE => DOUBLE_QUOTE),
+                    (QUOTE => ESCAPED_QUOTE)
                 ),
                 _ => unreachable!(),
             },
             QuoteStyle::Double => match luau_string {
-                LuauString::SingleQuotes(smol_str) => smol_str.replace(r#"\""#, r#"""#),
+                LuauString::SingleQuotes(smol_str) => convert!(
+                    smol_str,
+                    DOUBLE_QUOTE,
+                    (ESCAPED_QUOTE => QUOTE),
+                    (DOUBLE_QUOTE => ESCAPED_DOUBLE_QUOTE)
+                ),
                 LuauString::DoubleQuotes(smol_str) => smol_str.to_string(),
                 _ => unreachable!(),
             },
@@ -103,6 +106,9 @@ impl QuoteStyle {
     /// chosen.
     #[inline]
     fn pick_best(preferred: String, other: String) -> String {
+        println!("preferred - {preferred}");
+        println!("  other   - {other}");
+        println!("{},{}", count_escapes(&preferred), count_escapes(&other));
         if count_escapes(&preferred) > count_escapes(&other) {
             other
         } else {
@@ -123,12 +129,12 @@ impl QuoteStyle {
                     Self::luau_string_to_string(luau_string)
                 }
                 QuoteStyle::PreferSingle => Self::pick_best(
+                    Self::convert(&Self::Single, luau_string),
                     Self::luau_string_to_string(luau_string),
-                    Self::convert(&Self::Double, luau_string),
                 ),
                 QuoteStyle::PreferDouble => Self::pick_best(
+                    Self::convert(&Self::Double, luau_string),
                     Self::luau_string_to_string(luau_string),
-                    Self::convert(&Self::Single, luau_string),
                 ),
                 _ => self.convert(luau_string),
             },
