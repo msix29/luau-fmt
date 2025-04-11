@@ -3,6 +3,7 @@
 mod do_block;
 mod function;
 mod generic_for;
+mod get_trailing_trivia;
 mod if_statement;
 mod local_assignment;
 mod numerical_for;
@@ -12,12 +13,74 @@ mod statement;
 mod type_definition;
 mod while_loop;
 
-use luau_parser::prelude::Block;
+use get_trailing_trivia::{
+    get_trailing_trivia_expr, get_trailing_trivia_function_call, get_trailing_trivia_token,
+    get_trailing_trivia_type,
+};
+use luau_parser::prelude::{Block, Statement, Trivia};
 
 use crate::{
     config::{Config, Semicolon},
     traits::{Format, Indentation},
 };
+
+fn get_trailing_spaces(statement: &Statement) -> String {
+    let trivia = match statement {
+        Statement::ERROR => unreachable!(),
+        Statement::LocalFunction(local_function) => {
+            get_trailing_trivia_token(&local_function.end_keyword)
+        }
+        Statement::LocalAssignment(local_assignment) => local_assignment
+            .expressions
+            .last()
+            .map(|expression| get_trailing_trivia_expr(expression))
+            .unwrap_or_else(|| {
+                let name = local_assignment.name_list.last().unwrap();
+
+                name.r#type
+                    .as_ref()
+                    .map(|type_value| get_trailing_trivia_type(type_value))
+                    .unwrap_or_else(|| get_trailing_trivia_token(&name.name))
+            }),
+        Statement::TypeDefinition(type_definition) => {
+            get_trailing_trivia_type(&type_definition.type_value)
+        }
+        Statement::IfStatement(if_statement) => {
+            get_trailing_trivia_token(&if_statement.end_keyword)
+        }
+        Statement::DoBlock(do_block) => get_trailing_trivia_token(&do_block.end_keyword),
+        Statement::GenericFor(generic_for) => {
+            get_trailing_trivia_token(&generic_for.do_block.end_keyword)
+        }
+        Statement::NumericalFor(numerical_for) => {
+            get_trailing_trivia_token(&numerical_for.do_block.end_keyword)
+        }
+        Statement::RepeatBlock(repeat_block) => get_trailing_trivia_expr(&repeat_block.condition),
+        Statement::WhileLoop(while_loop) => {
+            get_trailing_trivia_token(&while_loop.do_block.end_keyword)
+        }
+        Statement::SetExpression(set_expression) => {
+            get_trailing_trivia_expr(set_expression.values.last().unwrap())
+        }
+        Statement::CompoundSetExpression(compound_set_expression) => {
+            get_trailing_trivia_expr(&compound_set_expression.value)
+        }
+        Statement::FunctionCall(function_call) => get_trailing_trivia_function_call(function_call),
+        Statement::GlobalFunction(global_function) => {
+            get_trailing_trivia_token(&global_function.end_keyword)
+        }
+        Statement::TypeFunction(type_function) => {
+            get_trailing_trivia_token(&type_function.end_keyword)
+        }
+    };
+
+    trivia
+        .iter()
+        .fold(String::new(), |str, trivia| match trivia {
+            Trivia::Spaces(smol_str) => str + smol_str,
+            Trivia::Comment(_) => str,
+        })
+}
 
 impl Format for Block {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
@@ -37,10 +100,30 @@ impl Format for Block {
         for (statement, semicolon) in self.statements.iter() {
             formatted_code.push_str(&statement.format(indentation, config));
 
-            let trimmed = formatted_code.trim_end();
-            let spaces = formatted_code[trimmed.len()..].to_string();
+            let spaces = semicolon
+                .as_ref()
+                .map(|semicolon| {
+                    get_trailing_trivia_token(semicolon).iter().fold(
+                        String::new(),
+                        |str, trivia| match trivia {
+                            Trivia::Spaces(smol_str) => str + smol_str,
+                            Trivia::Comment(_) => str,
+                        },
+                    )
+                })
+                .unwrap_or_else(|| get_trailing_spaces(statement));
 
             let new_lines = spaces.matches('\n').count();
+
+            let spaces = if config.keep_statements_spacing {
+                spaces
+            } else if new_lines > 2 {
+                // Maximum of 2 new lines (1 empty line) if we
+                // don't preserve user spacing.
+                config.newline_style.to_string().repeat(2)
+            } else {
+                config.newline_style.to_string()
+            };
 
             match config.semicolon {
                 Semicolon::Keep => {
@@ -50,27 +133,12 @@ impl Format for Block {
                     formatted_code.push_str(&semicolon.format(indentation, config));
                 }
                 Semicolon::Always => {
-                    let ending_spaces = if config.keep_statements_spacing {
-                        formatted_code = trimmed.to_string();
-
-                        spaces
-                    } else {
-                        formatted_code = trimmed.to_string();
-
-                        if new_lines > 2 {
-                            // Maximum of 2 new lines (1 empty line) if we
-                            // don't preserve user spacing.
-                            config.newline_style.to_string().repeat(2)
-                        } else {
-                            config.newline_style.to_string()
-                        }
-                    };
-
                     formatted_code.push(';');
-                    formatted_code.push_str(&ending_spaces);
                 }
                 _ => (),
             }
+
+            formatted_code.push_str(&spaces);
         }
 
         if config.add_final_newline {
