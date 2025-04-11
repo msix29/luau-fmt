@@ -39,7 +39,9 @@ impl Format for LocalFunction {
 impl Format for GlobalFunctionName {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         match self {
-            GlobalFunctionName::SimpleName(token) => token.format_with_args(indentation, config, TokenFormatType::Name),
+            GlobalFunctionName::SimpleName(token) => {
+                token.format_with_args(indentation, config, TokenFormatType::Name)
+            }
             GlobalFunctionName::Table {
                 table,
                 keys,

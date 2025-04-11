@@ -65,7 +65,6 @@ pub struct Config {
     pub variable_casing: NamingConvention,
     pub method_casing: NamingConvention,
     pub type_casing: NamingConvention,
-
     //TODO: Sorting `require` and `game:GetService` calls.
 }
 
