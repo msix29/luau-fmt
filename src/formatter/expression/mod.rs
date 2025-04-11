@@ -32,7 +32,7 @@ impl Format for Expression {
             | Expression::Boolean(token)
             | Expression::Number(token)
             | Expression::String(token) => token.format(indentation, config),
-            Expression::Closure(closure) => closure.format(indentation, config),
+            Expression::Closure(closure) => closure.format(indentation + 1, config),
             Expression::FunctionCall(function_call) => function_call.format(indentation, config),
             Expression::ExpressionWrap(bracketed) => bracketed.format(indentation, config),
             Expression::Var(var) => var.format(indentation, config),
