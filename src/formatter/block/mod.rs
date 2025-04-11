@@ -84,6 +84,8 @@ fn get_trailing_spaces(statement: &Statement) -> String {
 
 impl Format for Block {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
+        let indentation_spacing = config.indent_style.to_string(indentation, config);
+
         let mut formatted_code =
             config.newline_style.to_string() + &config.indent_style.to_string(indentation, config);
 
@@ -117,7 +119,7 @@ impl Format for Block {
 
             let spaces = if config.keep_statements_spacing {
                 spaces
-            } else if new_lines > 2 {
+            } else if new_lines >= 2 {
                 // Maximum of 2 new lines (1 empty line) if we
                 // don't preserve user spacing.
                 config.newline_style.to_string().repeat(2)
@@ -139,14 +141,18 @@ impl Format for Block {
             }
 
             formatted_code.push_str(&spaces);
+            formatted_code.push_str(&indentation_spacing);
         }
 
-        if indentation == 0 {
-            formatted_code = formatted_code.trim_end().to_string();
+        formatted_code = formatted_code.trim_end().to_string();
 
+        if indentation == 0 {
             if config.add_final_newline {
                 formatted_code.push_str(config.newline_style.as_str());
             }
+        } else {
+            formatted_code.push_str(config.newline_style.as_str());
+            formatted_code.push_str(&config.indent_style.to_string(indentation - 1, config));
         }
 
         formatted_code
