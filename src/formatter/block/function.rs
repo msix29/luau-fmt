@@ -21,7 +21,7 @@ impl Format for LocalFunction {
         let mut string = self.attributes.format(indentation, config);
         string.push_str("local function ");
         string.push_str(&self.function_name.format(indentation, config));
-        string.push_str(&self.parameters.format_with_args(indentation, config, " "));
+        string.push_str(&self.parameters.format_with_args(indentation, config, ", "));
         string.push_str(&self.colon.format(indentation, config));
         string.push(' ');
         string.push_str(&self.return_type.format(indentation, config));
@@ -67,7 +67,7 @@ impl Format for GlobalFunction {
         let mut string = self.attributes.format(indentation, config);
         string.push_str("function ");
         string.push_str(&self.function_name.format(indentation, config));
-        string.push_str(&self.parameters.format_with_args(indentation, config, " "));
+        string.push_str(&self.parameters.format_with_args(indentation, config, ", "));
         string.push_str(&self.colon.format(indentation, config));
         string.push(' ');
         string.push_str(&self.return_type.format(indentation, config));
@@ -121,7 +121,7 @@ impl Format for TypeFunction {
         };
 
         string.push_str(&self.function_name.format(indentation, config));
-        string.push_str(&self.parameters.format_with_args(indentation, config, " "));
+        string.push_str(&self.parameters.format_with_args(indentation, config, ", "));
         string.push_str(&self.colon.format(indentation, config));
         string.push(' ');
         string.push_str(&self.return_type.format(indentation, config));

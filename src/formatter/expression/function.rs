@@ -56,7 +56,7 @@ impl Format for FunctionArguments {
                 " ".to_string() + &table.format_with_args(indentation, config, false)
             }
             FunctionArguments::List(bracketed) => {
-                bracketed.format_with_args(indentation, config, " ")
+                bracketed.format_with_args(indentation, config, ", ")
             }
         }
     }
@@ -75,7 +75,7 @@ impl Format for Closure {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         let mut string = self.attributes.format(indentation, config);
         string.push_str("function ");
-        string.push_str(&self.parameters.format_with_args(indentation, config, " "));
+        string.push_str(&self.parameters.format_with_args(indentation, config, ", "));
         string.push_str(&self.colon.format(indentation, config));
         string.push(' ');
         string.push_str(&self.return_type.format(indentation, config));

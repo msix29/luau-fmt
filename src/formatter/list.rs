@@ -48,9 +48,7 @@ impl<T: Format> FormatWithArgs<&str> for ListItem<T> {
         separator: &str,
     ) -> String {
         match self {
-            ListItem::Trailing { item, separator } => {
-                item.format(indentation, config) + &separator.format(indentation, config)
-            }
+            ListItem::Trailing { item, .. } => item.format(indentation, config) + separator,
             ListItem::NonTrailing(item) => item.format(indentation, config),
         }
     }
@@ -63,9 +61,8 @@ impl<A, T: FormatWithArgs<A>> FormatWithArgs<(&str, A)> for ListItem<T> {
         (separator, args): (&str, A),
     ) -> String {
         match self {
-            ListItem::Trailing { item, separator } => {
-                item.format_with_args(indentation, config, args)
-                    + &separator.format(indentation, config)
+            ListItem::Trailing { item, .. } => {
+                item.format_with_args(indentation, config, args) + separator
             }
             ListItem::NonTrailing(item) => item.format_with_args(indentation, config, args),
         }
