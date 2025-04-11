@@ -52,14 +52,12 @@ impl FormatWithArgs<TokenFormatType> for Token {
             TokenType::Literal(Literal::String(luau_string)) => {
                 luau_string.format(indentation, config)
             }
-            TokenType::Identifier(identifier) => {
-                match token_format_type {
-                    TokenFormatType::Type => config.type_casing.apply(&identifier),
-                    TokenFormatType::Method => config.method_casing.apply(&identifier),
-                    TokenFormatType::Name => config.variable_casing.apply(&identifier),
-                    TokenFormatType::None => unreachable!(),
-                }
-            }
+            TokenType::Identifier(identifier) => match token_format_type {
+                TokenFormatType::Type => config.type_casing.apply(identifier),
+                TokenFormatType::Method => config.method_casing.apply(identifier),
+                TokenFormatType::Name => config.variable_casing.apply(identifier),
+                TokenFormatType::None => unreachable!(),
+            },
 
             // `unwrap` itself is safe and should never error as this will only be
             // be called by the library, which checks for the CST's correctness
