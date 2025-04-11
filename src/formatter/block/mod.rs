@@ -141,8 +141,12 @@ impl Format for Block {
             formatted_code.push_str(&spaces);
         }
 
-        if config.add_final_newline {
-            formatted_code.push_str(config.newline_style.as_str());
+        if indentation == 0 {
+            formatted_code = formatted_code.trim_end().to_string();
+
+            if config.add_final_newline {
+                formatted_code.push_str(config.newline_style.as_str());
+            }
         }
 
         formatted_code
