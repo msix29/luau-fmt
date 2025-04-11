@@ -4,7 +4,7 @@
 //! * [`GlobalFunction`]
 //! * [`GlobalFunctionName`]
 
-use luau_parser::types::{GlobalFunction, GlobalFunctionName, LocalFunction};
+use luau_parser::types::{GlobalFunction, GlobalFunctionName, LocalFunction, Parameter};
 
 use crate::{
     config::Config,
@@ -69,5 +69,22 @@ impl Format for GlobalFunction {
         string.push_str("end");
 
         string
+    }
+}
+
+impl Format for Parameter {
+    fn format(&self, indentation: Indentation, config: &Config) -> String {
+        if let Some(r#type) = self.r#type.as_ref() {
+            let mut string = self
+                .name
+                .format_with_args(indentation, config, TokenFormatType::Name);
+            string.push_str(" = ");
+            string.push_str(&r#type.format(indentation, config));
+
+            string
+        } else {
+            self.name
+                .format_with_args(indentation, config, TokenFormatType::Name)
+        }
     }
 }
