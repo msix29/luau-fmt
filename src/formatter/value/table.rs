@@ -73,55 +73,41 @@ impl FormatWithArgs<bool> for Table {
             CompactTable::Never => false,
         };
 
-        if single_line {
-            let spaces = " ";
-            let separator = ",".to_string() + spaces;
-            let mut string = "{".to_string()
-                + spaces
-                + &self
-                    .0
-                    .format_with_args(indentation, config, (&separator, is_type));
-
-            match config.trailing_commas {
-                TrailingCommas::Always if !string.ends_with(&separator) => {
-                    string.push_str(&separator)
-                }
-                TrailingCommas::Never => {
-                    string = string.trim_end_matches(&separator).to_string() + spaces
-                }
-                _ => {
-                    if !string.ends_with(&separator) {
-                        string.push_str(spaces);
-                    }
-                }
-            }
-
-            string + "}"
+        let spaces = if single_line {
+            " ".to_string()
         } else {
-            let spaces = config.newline_style.to_string()
-                + &config.indent_style.to_string(indentation + 1, config);
-            let separator = ",".to_string() + &spaces;
+            config.newline_style.to_string()
+                + &config.indent_style.to_string(indentation + 1, config)
+        };
+        let separator = ",".to_string() + &spaces;
 
-            let mut string = "{".to_string()
-                + &spaces
-                + &self
-                    .0
-                    .format_with_args(indentation, config, (&separator, is_type));
+        let mut string = "{".to_string()
+            + &spaces
+            + &self
+                .0
+                .item
+                .format_with_args(indentation, config, (&separator, is_type));
 
-            match config.trailing_commas {
-                TrailingCommas::Never => string = string.trim_end_matches(&separator).to_string(),
-                _ if !string.ends_with(&separator) => string.push_str(&separator),
-                _ => {
-                    if !string.ends_with(&separator) {
-                        string.push_str(&spaces);
-                    }
+        match config.trailing_commas {
+            TrailingCommas::Never => string = string.trim_end_matches(&separator).to_string(),
+            TrailingCommas::OnlyMultiLine if !single_line && !string.ends_with(&separator) => {
+                string.push_str(&separator)
+            }
+            TrailingCommas::Always if !string.ends_with(&separator) => string.push_str(&separator),
+            _ => {
+                if !string.ends_with(&separator) {
+                    string.push_str(&spaces);
                 }
             }
-
-            // Remove the last space.
-            string.pop();
-
-            string + "}"
         }
+
+        if !single_line {
+            // Remove the last indentation.
+            for _ in 0..config.indent_style.to_string(1, config).len() {
+                string.pop();
+            }
+        }
+
+        string + "}"
     }
 }
