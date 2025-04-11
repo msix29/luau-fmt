@@ -74,7 +74,7 @@ impl Format for FunctionArgument {
 impl Format for Closure {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         let mut string = "function ".to_string();
-        string.push_str(&self.parameters.format_with(indentation, config, " "));
+        string.push_str(&self.parameters.format_with_args(indentation, config, " "));
         string.push_str(&self.colon.format(indentation, config));
         string.push(' ');
         string.push_str(&self.return_type.format(indentation, config));

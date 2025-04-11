@@ -20,7 +20,7 @@ impl Format for TableAccessPrefix {
                 function_call.format(indentation, config)
             }
             TableAccessPrefix::ExpressionWrap(bracketed) => {
-                bracketed.format_with_args(indentation, config, " ")
+                bracketed.format(indentation, config)
             }
         }
     }

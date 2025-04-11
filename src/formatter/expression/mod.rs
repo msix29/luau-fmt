@@ -8,7 +8,6 @@ use luau_parser::types::{ElseIfExpression, Expression, IfExpression, PrefixExp};
 
 use crate::{
     config::Config,
-    formatter::TokenFormatType,
     traits::{Format, FormatWithArgs, Indentation},
 };
 
@@ -17,9 +16,7 @@ impl Format for PrefixExp {
         match self {
             PrefixExp::Var(var) => var.format(indentation, config),
             PrefixExp::FunctionCall(function_call) => function_call.format(indentation, config),
-            PrefixExp::ExpressionWrap(bracketed) => {
-                bracketed.format_with_args(indentation, config, " ")
-            }
+            PrefixExp::ExpressionWrap(bracketed) => bracketed.format(indentation, config),
         }
     }
 }
@@ -34,9 +31,7 @@ impl Format for Expression {
             | Expression::String(token) => token.format(indentation, config),
             Expression::Closure(closure) => closure.format(indentation, config),
             Expression::FunctionCall(function_call) => function_call.format(indentation, config),
-            Expression::ExpressionWrap(bracketed) => {
-                bracketed.format_with_args(indentation, config, " ")
-            }
+            Expression::ExpressionWrap(bracketed) => bracketed.format(indentation, config),
             Expression::Var(var) => var.format(indentation, config),
             Expression::Table(table) => table.format_with_args(indentation, config, false),
             Expression::UnaryExpression {
@@ -59,7 +54,7 @@ impl Format for Expression {
             } => {
                 expression.format(indentation, config)
                     + " :: "
-                    + cast_to.format(indentation, config)
+                    + &cast_to.format(indentation, config)
             }
             Expression::IfExpression(if_expression) => if_expression.format(indentation, config),
         }
