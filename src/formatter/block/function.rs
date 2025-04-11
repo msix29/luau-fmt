@@ -39,13 +39,13 @@ impl Format for LocalFunction {
 impl Format for GlobalFunctionName {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         match self {
-            GlobalFunctionName::SimpleName(token) => token.format(indentation, config),
+            GlobalFunctionName::SimpleName(token) => token.format_with_args(indentation, config, TokenFormatType::Name),
             GlobalFunctionName::Table {
                 table,
                 keys,
                 method,
             } => {
-                let mut string = table.format(indentation, config);
+                let mut string = table.format_with_args(indentation, config, TokenFormatType::Name);
 
                 for key in keys.iter() {
                     string.push_str(&key.format(indentation, config));
