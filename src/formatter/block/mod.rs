@@ -1,6 +1,5 @@
 //! All `impl` blocks for the main statements in a [`Cst`](luau_parser::types::Cst).
 
-mod comment;
 mod do_block;
 mod function;
 mod generic_for;

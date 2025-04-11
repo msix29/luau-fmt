@@ -30,7 +30,6 @@ impl Format for Statement {
             Statement::GlobalFunction(global_function) => {
                 global_function.format(indentation, config)
             }
-            Statement::Comment(comment) => comment.format(indentation, config),
         }
     }
 }
