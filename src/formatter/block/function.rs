@@ -3,6 +3,7 @@
 //! * [`LocalFunction`]
 //! * [`GlobalFunction`]
 //! * [`GlobalFunctionName`]
+//! * [`Parameter`]
 
 use luau_parser::types::{GlobalFunction, GlobalFunctionName, LocalFunction, Parameter};
 
