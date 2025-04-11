@@ -65,13 +65,26 @@ impl FormatWithArgs<TokenFormatType> for Token {
             token_type => token_type.try_as_string().unwrap_or_default(),
         };
 
-        self.leading_trivia
-            .iter()
-            .fold("".to_string(), |str, trivia| match trivia {
-                Trivia::Spaces(_) => str,
-                Trivia::Comment(comment) => str + &comment.print(),
-            })
-            + &token_type
+        let mut leading_trivia = String::new();
+        let mut found_comment = false;
+
+        for trivia in self.leading_trivia.iter() {
+            match trivia {
+                Trivia::Spaces(smol_str) => {
+                    if found_comment {
+                        leading_trivia.push_str(smol_str);
+                    }
+
+                    found_comment = false;
+                }
+                Trivia::Comment(comment) => {
+                    found_comment = true;
+                    leading_trivia.push_str(comment.print().trim_end());
+                }
+            }
+        }
+
+        leading_trivia + &token_type
     }
 }
 
