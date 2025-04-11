@@ -4,8 +4,11 @@
 //! * [`GlobalFunction`]
 //! * [`GlobalFunctionName`]
 //! * [`Parameter`]
+//! * [`TypeFunction`]
 
-use luau_parser::types::{GlobalFunction, GlobalFunctionName, LocalFunction, Parameter};
+use luau_parser::types::{
+    GlobalFunction, GlobalFunctionName, LocalFunction, Parameter, TypeFunction,
+};
 
 use crate::{
     config::Config,
@@ -87,5 +90,25 @@ impl Format for Parameter {
             self.name
                 .format_with_args(indentation, config, TokenFormatType::Name)
         }
+    }
+}
+
+impl Format for TypeFunction {
+    fn format(&self, indentation: Indentation, config: &Config) -> String {
+        let mut string = if self.export_keyword.is_some() {
+            "export type function ".to_string()
+        } else {
+            "type function ".to_string()
+        };
+
+        string.push_str(&self.function_name.format(indentation, config));
+        string.push_str(&self.parameters.format_with_args(indentation, config, " "));
+        string.push_str(&self.colon.format(indentation, config));
+        string.push(' ');
+        string.push_str(&self.return_type.format(indentation, config));
+        string.push_str(&self.body.format(indentation + 1, config));
+        string.push_str("end");
+
+        string
     }
 }

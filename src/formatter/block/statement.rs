@@ -30,6 +30,7 @@ impl Format for Statement {
             Statement::GlobalFunction(global_function) => {
                 global_function.format(indentation, config)
             }
+            Statement::TypeFunction(type_function) => type_function.format(indentation, config),
         }
     }
 }
