@@ -4,7 +4,10 @@ mod function;
 mod table;
 mod var;
 
-use luau_parser::types::{ElseIfExpression, Expression, IfExpression, PrefixExp};
+use luau_parser::{
+    prelude::{Operator, TokenType},
+    types::{ElseIfExpression, Expression, IfExpression, PrefixExp},
+};
 
 use crate::{
     config::Config,
@@ -37,15 +40,34 @@ impl Format for Expression {
             Expression::UnaryExpression {
                 operator,
                 expression,
-            } => operator.format(indentation, config) + &expression.format(indentation, config),
+            } => {
+                if matches!(operator.token_type, TokenType::Operator(Operator::Not)) {
+                    operator.format(indentation, config)
+                        + " "
+                        + &expression.format(indentation, config)
+                } else {
+                    operator.format(indentation, config) + &expression.format(indentation, config)
+                }
+            }
             Expression::BinaryExpression {
                 left,
                 operator,
                 right,
             } => {
-                left.format(indentation, config)
-                    + &operator.format(indentation, config)
-                    + &right.format(indentation, config)
+                if matches!(
+                    operator.token_type,
+                    TokenType::Operator(Operator::Exponentiation)
+                ) {
+                    left.format(indentation, config)
+                        + &operator.format(indentation, config)
+                        + &right.format(indentation, config)
+                } else {
+                    left.format(indentation, config)
+                        + " "
+                        + &operator.format(indentation, config)
+                        + " "
+                        + &right.format(indentation, config)
+                }
             }
             Expression::TypeCast {
                 expression,
