@@ -106,9 +106,6 @@ impl QuoteStyle {
     /// chosen.
     #[inline]
     fn pick_best(preferred: String, other: String) -> String {
-        println!("preferred - {preferred}");
-        println!("  other   - {other}");
-        println!("{},{}", count_escapes(&preferred), count_escapes(&other));
         if count_escapes(&preferred) > count_escapes(&other) {
             other
         } else {
