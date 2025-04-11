@@ -49,8 +49,8 @@ impl Format for Expression {
             }
             Expression::TypeCast {
                 expression,
-                operator,
                 cast_to,
+                ..
             } => {
                 expression.format(indentation, config)
                     + " :: "
