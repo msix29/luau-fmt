@@ -22,11 +22,11 @@ impl Format for FunctionCallInvoked {
             FunctionCallInvoked::Function(prefix_exp) => prefix_exp.format(indentation, config),
             FunctionCallInvoked::TableMethod {
                 table,
-                colon,
                 method,
+                ..
             } => {
                 let mut string = table.format(indentation, config);
-                string.push(';');
+                string.push(':');
                 string.push_str(&method.format_with_args(
                     indentation,
                     config,
