@@ -8,8 +8,8 @@ mod name;
 mod value;
 
 use luau_parser::{
-    prelude::{Literal, LuauString, Token, TokenType},
-    types::Pointer,
+    prelude::{Literal, LuauString, Token, TokenType, Trivia},
+    types::{Pointer, Print},
 };
 
 use crate::{
@@ -48,7 +48,7 @@ impl FormatWithArgs<TokenFormatType> for Token {
         config: &Config,
         token_format_type: TokenFormatType,
     ) -> String {
-        match &self.token_type {
+        let token_type = match &self.token_type {
             TokenType::Literal(Literal::String(luau_string)) => {
                 luau_string.format(indentation, config)
             }
@@ -63,7 +63,15 @@ impl FormatWithArgs<TokenFormatType> for Token {
             // be called by the library, which checks for the CST's correctness
             // before starting any of the formatting.
             token_type => token_type.try_as_string().unwrap_or_default(),
-        }
+        };
+
+        self.leading_trivia
+            .iter()
+            .fold("".to_string(), |str, trivia| match trivia {
+                Trivia::Spaces(_) => str,
+                Trivia::Comment(comment) => str + &comment.print(),
+            })
+            + &token_type
     }
 }
 
