@@ -11,9 +11,23 @@ pub trait Format {
     fn format(&self, indentation: Indentation, config: &Config) -> String;
 }
 
+/// A trait which represents that this struct can be expanded to multiple strings.
+pub trait Expand {
+    /// Expand this struct into a multi-string.
+    fn expand(&self, indentation: Indentation, config: &Config) -> String;
+}
+
 /// A trait which represents that this struct can be formatted, the passed arguments
 /// customize the end result.
 pub trait FormatWithArgs<P> {
     /// Format this struct into a string.
     fn format_with_args(&self, indentation: Indentation, config: &Config, args: P) -> String;
+}
+
+
+/// A trait which represents that this struct can be expanded, the passed arguments
+/// customize the end result.
+pub trait ExpandWithArgs<P> {
+    /// Expand this struct into a string.
+    fn expand_with_args(&self, indentation: Indentation, config: &Config, args: P) -> String;
 }

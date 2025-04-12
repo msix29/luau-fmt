@@ -13,7 +13,7 @@ use luau_parser::types::{
 use crate::{
     config::Config,
     formatter::TokenFormatType,
-    traits::{Format, FormatWithArgs, Indentation},
+    traits::{Expand, ExpandWithArgs, Format, FormatWithArgs, Indentation},
 };
 
 impl Format for FunctionCallInvoked {
@@ -84,5 +84,58 @@ impl Format for Closure {
         string.push_str(&self.end_keyword.format(indentation, config));
 
         string
+    }
+}
+
+impl Expand for FunctionCallInvoked {
+    fn expand(&self, indentation: Indentation, config: &Config) -> String {
+        match self {
+            FunctionCallInvoked::Function(prefix_exp) => prefix_exp.expand(indentation, config),
+            FunctionCallInvoked::TableMethod {
+                table,
+                colon,
+                method,
+            } => {
+                let mut string = table.format(indentation, config);
+                string.push_str(
+                    &(config.newline_style.to_string()
+                        + &config.indent_style.to_string(indentation + 1, config)),
+                );
+                string.push_str(&colon.format(indentation, config));
+                string.push_str(&method.format_with_args(
+                    indentation,
+                    config,
+                    TokenFormatType::Method,
+                ));
+
+                string
+            }
+        }
+    }
+}
+
+impl Expand for FunctionCall {
+    fn expand(&self, indentation: Indentation, config: &Config) -> String {
+        let string = self.invoked.format(indentation, config);
+        if string.len() > config.column_width {
+            self.invoked.expand(indentation, config) + &self.arguments.format(indentation, config)
+        } else {
+            string + &self.arguments.expand(indentation, config)
+        }
+    }
+}
+
+impl Expand for FunctionArguments {
+    fn expand(&self, indentation: Indentation, config: &Config) -> String {
+        match self {
+            FunctionArguments::List(bracketed) => bracketed.expand_with_args(
+                indentation,
+                config,
+                &(",".to_string()
+                    + &config.newline_style.to_string()
+                    + &config.indent_style.to_string(indentation + 1, config)),
+            ),
+            _ => self.format(indentation, config),
+        }
     }
 }

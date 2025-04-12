@@ -11,15 +11,31 @@ use luau_parser::{
 
 use crate::{
     config::Config,
-    traits::{Format, FormatWithArgs, Indentation},
+    traits::{Expand, Format, FormatWithArgs, Indentation},
 };
 
 impl Format for PrefixExp {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
-        match self {
+        let string = match self {
             PrefixExp::Var(var) => var.format(indentation, config),
             PrefixExp::FunctionCall(function_call) => function_call.format(indentation, config),
             PrefixExp::ExpressionWrap(bracketed) => bracketed.format(indentation, config),
+        };
+
+        if string.len() > config.column_width {
+            self.expand(indentation, config)
+        } else {
+            string
+        }
+    }
+}
+
+impl Expand for PrefixExp {
+    fn expand(&self, indentation: Indentation, config: &Config) -> String {
+        match self {
+            PrefixExp::Var(var) => var.expand(indentation, config),
+            PrefixExp::FunctionCall(function_call) => function_call.expand(indentation, config),
+            _ => self.format(indentation, config),
         }
     }
 }
