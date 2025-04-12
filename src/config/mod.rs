@@ -22,13 +22,13 @@ reexport!(
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Config {
     /// The maximum width of characters per line.
-    pub column_width: u32,
+    pub column_width: usize,
 
     /// The maximum width of a string per line.
-    pub string_width: u32,
+    pub string_width: usize,
 
     /// The maximum width of characters in a comment per line.
-    pub comments_width: u32,
+    pub comments_width: usize,
 
     /// Quote style to use.
     pub quote_style: QuoteStyle,
