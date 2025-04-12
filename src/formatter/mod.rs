@@ -75,7 +75,7 @@ pub enum TokenFormatType {
 }
 
 impl FormatWithArgs<TokenFormatType> for Token {
-    fn format_with_args(
+    fn format_with(
         &self,
         indentation: Indentation,
         config: &Config,
@@ -124,7 +124,7 @@ impl FormatWithArgs<TokenFormatType> for Token {
 impl Format for Token {
     #[inline]
     fn format(&self, indentation: Indentation, config: &Config) -> String {
-        self.format_with_args(indentation, config, TokenFormatType::None)
+        self.format_with(indentation, config, TokenFormatType::None)
     }
 }
 
@@ -137,9 +137,9 @@ impl<T: Format> Format for Option<T> {
     }
 }
 impl<A, T: FormatWithArgs<A>> FormatWithArgs<A> for Option<T> {
-    fn format_with_args(&self, indentation: Indentation, config: &Config, args: A) -> String {
+    fn format_with(&self, indentation: Indentation, config: &Config, args: A) -> String {
         match self {
-            Some(item) => item.format_with_args(indentation, config, args),
+            Some(item) => item.format_with(indentation, config, args),
             None => "".to_string(),
         }
     }
@@ -151,7 +151,7 @@ impl<T: Format> Format for Pointer<T> {
     }
 }
 impl<A, T: FormatWithArgs<A>> FormatWithArgs<A> for Pointer<T> {
-    fn format_with_args(&self, indentation: Indentation, config: &Config, args: A) -> String {
-        (**self).format_with_args(indentation, config, args)
+    fn format_with(&self, indentation: Indentation, config: &Config, args: A) -> String {
+        (**self).format_with(indentation, config, args)
     }
 }

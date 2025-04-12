@@ -8,7 +8,7 @@ use crate::{
 };
 
 impl<T: Format> FormatWithArgs<&str> for List<T> {
-    fn format_with_args(
+    fn format_with(
         &self,
         indentation: Indentation,
         config: &Config,
@@ -17,14 +17,14 @@ impl<T: Format> FormatWithArgs<&str> for List<T> {
         let mut string = String::new();
 
         for item in self.iter() {
-            string.push_str(&item.format_with_args(indentation, config, separator));
+            string.push_str(&item.format_with(indentation, config, separator));
         }
 
         string
     }
 }
 impl<A: Clone, T: FormatWithArgs<A>> FormatWithArgs<(&str, A)> for List<T> {
-    fn format_with_args(
+    fn format_with(
         &self,
         indentation: Indentation,
         config: &Config,
@@ -33,7 +33,7 @@ impl<A: Clone, T: FormatWithArgs<A>> FormatWithArgs<(&str, A)> for List<T> {
         let mut string = String::new();
 
         for item in self.iter() {
-            string.push_str(&item.format_with_args(indentation, config, (separator, args.clone())));
+            string.push_str(&item.format_with(indentation, config, (separator, args.clone())));
         }
 
         string
@@ -41,7 +41,7 @@ impl<A: Clone, T: FormatWithArgs<A>> FormatWithArgs<(&str, A)> for List<T> {
 }
 
 impl<T: Format> FormatWithArgs<&str> for ListItem<T> {
-    fn format_with_args(
+    fn format_with(
         &self,
         indentation: Indentation,
         config: &Config,
@@ -54,7 +54,7 @@ impl<T: Format> FormatWithArgs<&str> for ListItem<T> {
     }
 }
 impl<A, T: FormatWithArgs<A>> FormatWithArgs<(&str, A)> for ListItem<T> {
-    fn format_with_args(
+    fn format_with(
         &self,
         indentation: Indentation,
         config: &Config,
@@ -62,9 +62,9 @@ impl<A, T: FormatWithArgs<A>> FormatWithArgs<(&str, A)> for ListItem<T> {
     ) -> String {
         match self {
             ListItem::Trailing { item, .. } => {
-                item.format_with_args(indentation, config, args) + separator
+                item.format_with(indentation, config, args) + separator
             }
-            ListItem::NonTrailing(item) => item.format_with_args(indentation, config, args),
+            ListItem::NonTrailing(item) => item.format_with(indentation, config, args),
         }
     }
 }

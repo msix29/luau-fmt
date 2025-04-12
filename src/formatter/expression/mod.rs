@@ -52,7 +52,7 @@ impl Format for Expression {
             Expression::FunctionCall(function_call) => function_call.format(indentation, config),
             Expression::ExpressionWrap(bracketed) => bracketed.format(indentation, config),
             Expression::Var(var) => var.format(indentation, config),
-            Expression::Table(table) => table.format_with_args(indentation, config, false),
+            Expression::Table(table) => table.format_with(indentation, config, false),
             Expression::UnaryExpression {
                 operator,
                 expression,

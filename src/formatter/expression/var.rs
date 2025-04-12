@@ -13,7 +13,7 @@ impl Format for Var {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         match self {
             Var::ERROR => unreachable!(),
-            Var::Name(token) => token.format_with_args(indentation, config, TokenFormatType::Name),
+            Var::Name(token) => token.format_with(indentation, config, TokenFormatType::Name),
             Var::TableAccess(table_access) => table_access.format(indentation, config),
         }
     }

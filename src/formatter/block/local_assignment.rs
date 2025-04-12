@@ -11,13 +11,13 @@ impl Format for LocalAssignment {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         let mut string = self.local_token.format(indentation, config);
         string.push(' ');
-        string.push_str(&self.name_list.format_with_args(indentation, config, ", "));
+        string.push_str(&self.name_list.format_with(indentation, config, ", "));
 
         if self.equal_token.is_some() {
             string.push(' ');
             string.push_str(&self.equal_token.format(indentation, config));
             string.push(' ');
-            string.push_str(&self.expressions.format_with_args(indentation, config, ", "));
+            string.push_str(&self.expressions.format_with(indentation, config, ", "));
         }
 
         string

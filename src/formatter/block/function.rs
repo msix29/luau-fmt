@@ -24,8 +24,8 @@ impl Format for LocalFunction {
         string.push_str(&self.function_keyword.format(indentation, config));
         string.push(' ');
         string.push_str(&self.function_name.format(indentation, config));
-        string.push_str(&self.generics.format_with_args(indentation, config, ", "));
-        string.push_str(&self.parameters.format_with_args(indentation, config, ", "));
+        string.push_str(&self.generics.format_with(indentation, config, ", "));
+        string.push_str(&self.parameters.format_with(indentation, config, ", "));
         string.push_str(&self.colon.format(indentation, config));
         string.push(' ');
         string.push_str(&self.return_type.format(indentation, config));
@@ -40,14 +40,14 @@ impl Format for GlobalFunctionName {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         match self {
             GlobalFunctionName::SimpleName(token) => {
-                token.format_with_args(indentation, config, TokenFormatType::Name)
+                token.format_with(indentation, config, TokenFormatType::Name)
             }
             GlobalFunctionName::Table {
                 table,
                 keys,
                 method,
             } => {
-                let mut string = table.format_with_args(indentation, config, TokenFormatType::Name);
+                let mut string = table.format_with(indentation, config, TokenFormatType::Name);
 
                 for key in keys.iter() {
                     string.push_str(&key.format(indentation, config));
@@ -55,7 +55,7 @@ impl Format for GlobalFunctionName {
 
                 if let Some(method) = method {
                     string.push_str(&method.0.format(indentation, config));
-                    string.push_str(&method.1.format_with_args(
+                    string.push_str(&method.1.format_with(
                         indentation,
                         config,
                         TokenFormatType::Method,
@@ -74,8 +74,8 @@ impl Format for GlobalFunction {
         string.push_str(&self.function_keyword.format(indentation, config));
         string.push(' ');
         string.push_str(&self.function_name.format(indentation, config));
-        string.push_str(&self.generics.format_with_args(indentation, config, ", "));
-        string.push_str(&self.parameters.format_with_args(indentation, config, ", "));
+        string.push_str(&self.generics.format_with(indentation, config, ", "));
+        string.push_str(&self.parameters.format_with(indentation, config, ", "));
         string.push_str(&self.colon.format(indentation, config));
         string.push(' ');
         string.push_str(&self.return_type.format(indentation, config));
@@ -92,7 +92,7 @@ impl Format for Attribute {
         "@".to_string()
             + &self
                 .attribute
-                .format_with_args(indentation, config, TokenFormatType::Name)
+                .format_with(indentation, config, TokenFormatType::Name)
     }
 }
 impl Format for Vec<Attribute> {
@@ -108,14 +108,14 @@ impl Format for Parameter {
         if let Some(r#type) = self.r#type.as_ref() {
             let mut string = self
                 .name
-                .format_with_args(indentation, config, TokenFormatType::Name);
+                .format_with(indentation, config, TokenFormatType::Name);
             string.push_str(&self.colon.format(indentation, config));
             string.push_str(&r#type.format(indentation, config));
 
             string
         } else {
             self.name
-                .format_with_args(indentation, config, TokenFormatType::Name)
+                .format_with(indentation, config, TokenFormatType::Name)
         }
     }
 }
@@ -135,8 +135,8 @@ impl Format for TypeFunction {
         string.push_str(&self.function_keyword.format(indentation, config));
         string.push(' ');
         string.push_str(&self.function_name.format(indentation, config));
-        string.push_str(&self.generics.format_with_args(indentation, config, ", "));
-        string.push_str(&self.parameters.format_with_args(indentation, config, ", "));
+        string.push_str(&self.generics.format_with(indentation, config, ", "));
+        string.push_str(&self.parameters.format_with(indentation, config, ", "));
         string.push_str(&self.colon.format(indentation, config));
         string.push(' ');
         string.push_str(&self.return_type.format(indentation, config));

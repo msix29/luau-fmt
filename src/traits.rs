@@ -21,7 +21,7 @@ pub trait Expand {
 /// customize the end result.
 pub trait FormatWithArgs<P> {
     /// Format this struct into a string.
-    fn format_with_args(&self, indentation: Indentation, config: &Config, args: P) -> String;
+    fn format_with(&self, indentation: Indentation, config: &Config, args: P) -> String;
 }
 
 
@@ -29,5 +29,5 @@ pub trait FormatWithArgs<P> {
 /// customize the end result.
 pub trait ExpandWithArgs<P> {
     /// Expand this struct into a string.
-    fn expand_with_args(&self, indentation: Indentation, config: &Config, args: P) -> String;
+    fn expand_with(&self, indentation: Indentation, config: &Config, args: P) -> String;
 }

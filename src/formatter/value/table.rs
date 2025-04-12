@@ -19,7 +19,7 @@ impl Format for TableKey {
             TableKey::ERROR => unreachable!(),
             TableKey::UndefinedNumber(_) | TableKey::UndefinedString(_) => "".to_string(),
             TableKey::Simple(token) => {
-                token.format_with_args(indentation, config, TokenFormatType::Name)
+                token.format_with(indentation, config, TokenFormatType::Name)
             }
             TableKey::Expression(bracketed) => bracketed.format(indentation, config),
             TableKey::Type(bracketed) => bracketed.format(indentation, config),
@@ -28,7 +28,7 @@ impl Format for TableKey {
 }
 
 impl FormatWithArgs<bool> for TableField {
-    fn format_with_args(&self, indentation: Indentation, config: &Config, is_type: bool) -> String {
+    fn format_with(&self, indentation: Indentation, config: &Config, is_type: bool) -> String {
         if self.equal_or_colon.is_none() {
             self.value.format(indentation, config)
         } else if is_type {
@@ -52,7 +52,7 @@ impl Format for TableFieldValue {
 }
 
 impl FormatWithArgs<bool> for Table {
-    fn format_with_args(&self, indentation: Indentation, config: &Config, is_type: bool) -> String {
+    fn format_with(&self, indentation: Indentation, config: &Config, is_type: bool) -> String {
         let single_line = match config.compact_table {
             CompactTable::Always => true,
             CompactTable::OnlyLiterals => !self.0.iter().all(|item| match &*item.value {
@@ -86,7 +86,7 @@ impl FormatWithArgs<bool> for Table {
             + &self
                 .0
                 .item
-                .format_with_args(indentation, config, (&separator, is_type));
+                .format_with(indentation, config, (&separator, is_type));
 
         match config.trailing_commas {
             TrailingCommas::Never => string = string.trim_end_matches(&separator).to_string(),

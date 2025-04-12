@@ -30,7 +30,7 @@ impl Format for TableAccessKey {
             TableAccessKey::Expression(table_key) => table_key.format(indentation, config),
             TableAccessKey::Name { name, .. } => {
                 //FIXME: What if this is a method?
-                ".".to_string() + &name.format_with_args(indentation, config, TokenFormatType::Name)
+                ".".to_string() + &name.format_with(indentation, config, TokenFormatType::Name)
             }
         }
     }

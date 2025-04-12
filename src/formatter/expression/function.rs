@@ -27,7 +27,7 @@ impl Format for FunctionCallInvoked {
             } => {
                 let mut string = table.format(indentation, config);
                 string.push_str(&colon.format(indentation, config));
-                string.push_str(&method.format_with_args(
+                string.push_str(&method.format_with(
                     indentation,
                     config,
                     TokenFormatType::Method,
@@ -53,10 +53,10 @@ impl Format for FunctionArguments {
                 " ".to_string() + &token.format(indentation, config)
             }
             FunctionArguments::Table(table) => {
-                " ".to_string() + &table.format_with_args(indentation, config, false)
+                " ".to_string() + &table.format_with(indentation, config, false)
             }
             FunctionArguments::List(bracketed) => {
-                bracketed.format_with_args(indentation, config, ", ")
+                bracketed.format_with(indentation, config, ", ")
             }
         }
     }
@@ -75,8 +75,8 @@ impl Format for Closure {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         let mut string = self.attributes.format(indentation, config);
         string.push_str(&self.function_keyword.format(indentation, config));
-        string.push_str(&self.generics.format_with_args(indentation, config, ", "));
-        string.push_str(&self.parameters.format_with_args(indentation, config, ", "));
+        string.push_str(&self.generics.format_with(indentation, config, ", "));
+        string.push_str(&self.parameters.format_with(indentation, config, ", "));
         string.push_str(&self.colon.format(indentation, config));
         string.push(' ');
         string.push_str(&self.return_type.format(indentation, config));
@@ -102,7 +102,7 @@ impl Expand for FunctionCallInvoked {
                         + &config.indent_style.to_string(indentation + 1, config)),
                 );
                 string.push_str(&colon.format(indentation, config));
-                string.push_str(&method.format_with_args(
+                string.push_str(&method.format_with(
                     indentation,
                     config,
                     TokenFormatType::Method,
@@ -128,7 +128,7 @@ impl Expand for FunctionCall {
 impl Expand for FunctionArguments {
     fn expand(&self, indentation: Indentation, config: &Config) -> String {
         match self {
-            FunctionArguments::List(bracketed) => bracketed.expand_with_args(
+            FunctionArguments::List(bracketed) => bracketed.expand_with(
                 indentation,
                 config,
                 &(",".to_string()
