@@ -8,12 +8,7 @@ use crate::{
 };
 
 impl<T: Format> FormatWithArgs<&str> for List<T> {
-    fn format_with(
-        &self,
-        indentation: Indentation,
-        config: &Config,
-        separator: &str,
-    ) -> String {
+    fn format_with(&self, indentation: Indentation, config: &Config, separator: &str) -> String {
         let mut string = String::new();
 
         for item in self.iter() {
@@ -41,12 +36,7 @@ impl<A: Clone, T: FormatWithArgs<A>> FormatWithArgs<(&str, A)> for List<T> {
 }
 
 impl<T: Format> FormatWithArgs<&str> for ListItem<T> {
-    fn format_with(
-        &self,
-        indentation: Indentation,
-        config: &Config,
-        separator: &str,
-    ) -> String {
+    fn format_with(&self, indentation: Indentation, config: &Config, separator: &str) -> String {
         match self {
             ListItem::Trailing { item, .. } => item.format(indentation, config) + separator,
             ListItem::NonTrailing(item) => item.format(indentation, config),

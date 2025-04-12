@@ -24,7 +24,6 @@ pub trait FormatWithArgs<P> {
     fn format_with(&self, indentation: Indentation, config: &Config, args: P) -> String;
 }
 
-
 /// A trait which represents that this struct can be expanded, the passed arguments
 /// customize the end result.
 pub trait ExpandWithArgs<P> {

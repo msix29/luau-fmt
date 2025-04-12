@@ -27,11 +27,7 @@ impl Format for FunctionCallInvoked {
             } => {
                 let mut string = table.format(indentation, config);
                 string.push_str(&colon.format(indentation, config));
-                string.push_str(&method.format_with(
-                    indentation,
-                    config,
-                    TokenFormatType::Method,
-                ));
+                string.push_str(&method.format_with(indentation, config, TokenFormatType::Method));
 
                 string
             }
@@ -55,9 +51,7 @@ impl Format for FunctionArguments {
             FunctionArguments::Table(table) => {
                 " ".to_string() + &table.format_with(indentation, config, false)
             }
-            FunctionArguments::List(bracketed) => {
-                bracketed.format_with(indentation, config, ", ")
-            }
+            FunctionArguments::List(bracketed) => bracketed.format_with(indentation, config, ", "),
         }
     }
 }
@@ -102,11 +96,7 @@ impl Expand for FunctionCallInvoked {
                         + &config.indent_style.to_string(indentation + 1, config)),
                 );
                 string.push_str(&colon.format(indentation, config));
-                string.push_str(&method.format_with(
-                    indentation,
-                    config,
-                    TokenFormatType::Method,
-                ));
+                string.push_str(&method.format_with(indentation, config, TokenFormatType::Method));
 
                 string
             }
