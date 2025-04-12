@@ -18,9 +18,42 @@ use crate::{
 };
 
 impl Format for LuauString {
-    fn format(&self, _indentation: Indentation, config: &Config) -> String {
-        //TODO: Length check
-        config.quote_style.apply(self)
+    fn format(&self, indentation: Indentation, config: &Config) -> String {
+        let string = config.quote_style.apply(self);
+
+        if string.len() > config.string_width {
+            let separator = "\\z".to_string()
+                + &config.newline_style.to_string()
+                + &config.indent_style.to_string(indentation + 1, config);
+
+            let words = string.split_whitespace().collect::<Vec<&str>>();
+            let mut current_line = String::new();
+            let mut result = String::new();
+
+            for word in words {
+                if current_line.len() + word.len() + 1 > config.string_width {
+                    if !current_line.is_empty() {
+                        result.push_str(&current_line);
+                        result.push_str(&separator);
+                    }
+
+                    current_line = word.to_string();
+                } else {
+                    current_line.push_str(word);
+                }
+
+                current_line.push(' ');
+            }
+
+            if !current_line.is_empty() {
+                result.push_str(&current_line);
+            }
+
+            result.pop(); // remove the final space
+            result
+        } else {
+            config.quote_style.apply(self)
+        }
     }
 }
 
