@@ -1,6 +1,6 @@
-use luau_parser::prelude::{
-    Expression, FunctionCall, FunctionCallInvoked, PrefixExp, TableAccessKey, TableKey, Token,
-    Trivia, TypeValue, Var,
+use luau_parser::{
+    prelude::{Expression, FunctionCall, TableAccessKey, TableKey, Token, Trivia, TypeValue, Var},
+    types::FunctionArguments,
 };
 
 #[inline]
@@ -84,20 +84,10 @@ fn get_trailing_trivia_var(var: &Var) -> &[Trivia] {
 }
 
 #[inline]
-fn get_trailing_trivia_prefix_exp(prefix_exp: &PrefixExp) -> &[Trivia] {
-    match prefix_exp {
-        PrefixExp::Var(var) => get_trailing_trivia_var(var),
-        PrefixExp::FunctionCall(function_call) => get_trailing_trivia_function_call(function_call),
-        PrefixExp::ExpressionWrap(bracketed) => {
-            get_trailing_trivia_token(&bracketed.closing_bracket)
-        }
-    }
-}
-
-#[inline]
 pub fn get_trailing_trivia_function_call(function_call: &FunctionCall) -> &[Trivia] {
-    match &function_call.invoked {
-        FunctionCallInvoked::Function(prefix_exp) => get_trailing_trivia_prefix_exp(prefix_exp),
-        FunctionCallInvoked::TableMethod { method, .. } => &method.trailing_trivia,
+    match &function_call.arguments {
+        FunctionArguments::String(token) => get_trailing_trivia_token(token),
+        FunctionArguments::Table(table) => get_trailing_trivia_token(&table.0.closing_bracket),
+        FunctionArguments::List(bracketed) => get_trailing_trivia_token(&bracketed.closing_bracket),
     }
 }
