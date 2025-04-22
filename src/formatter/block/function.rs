@@ -110,6 +110,7 @@ impl Format for Parameter {
                 .name
                 .format_with(indentation, config, TokenFormatType::Name);
             string.push_str(&self.colon.format(indentation, config));
+            string.push(' ');
             string.push_str(&r#type.format(indentation, config));
 
             string
