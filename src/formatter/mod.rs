@@ -14,7 +14,7 @@ use luau_parser::{
 
 use crate::{
     config::Config,
-    traits::{Format, FormatWithArgs, Indentation},
+    traits::{Expand, Format, FormatWithArgs, Indentation},
 };
 
 impl Format for LuauString {
@@ -153,5 +153,11 @@ impl<T: Format> Format for Pointer<T> {
 impl<A, T: FormatWithArgs<A>> FormatWithArgs<A> for Pointer<T> {
     fn format_with(&self, indentation: Indentation, config: &Config, args: A) -> String {
         (**self).format_with(indentation, config, args)
+    }
+}
+
+impl<T: Expand> Expand for Pointer<T> {
+    fn expand(&self, indentation: Indentation, config: &Config) -> String {
+        (**self).expand(indentation, config)
     }
 }
