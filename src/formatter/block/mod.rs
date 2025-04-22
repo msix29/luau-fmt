@@ -79,6 +79,22 @@ fn get_trailing_trivia_statement(statement: &Statement) -> &[Trivia] {
     }
 }
 
+#[inline]
+fn get_trailing_trivia_last_statement(last_statement: &TerminationStatement) -> &[Trivia] {
+    match last_statement {
+        TerminationStatement::Return {
+            expressions: Some(expressions),
+            ..
+        } => get_trailing_trivia_expr(expressions.last().unwrap()),
+        TerminationStatement::Break(token)
+        | TerminationStatement::Continue(token)
+        | TerminationStatement::Return {
+            return_keyword: token,
+            ..
+        } => get_trailing_trivia_token(token),
+    }
+}
+
 fn filter_trivia_for_spaces(trivia: &[Trivia]) -> String {
     trivia
         .iter()
@@ -93,21 +109,25 @@ fn get_trailing_spaces(statement: &Statement) -> String {
     filter_trivia_for_spaces(get_trailing_trivia_statement(statement))
 }
 
+#[inline]
 fn get_trailing_spaces_last_statement(last_statement: &TerminationStatement) -> String {
-    let trivia = match last_statement {
-        TerminationStatement::Return {
-            expressions: Some(expressions),
-            ..
-        } => get_trailing_trivia_expr(expressions.last().unwrap()),
-        TerminationStatement::Break(token)
-        | TerminationStatement::Continue(token)
-        | TerminationStatement::Return {
-            return_keyword: token,
-            ..
-        } => get_trailing_trivia_token(token),
+    filter_trivia_for_spaces(get_trailing_trivia_last_statement(last_statement))
+}
+
+fn get_trailing_comments<T, F>(
+    (statement, semicolon): &(T, Option<Token>),
+    get_trailing_trivia: F,
+) -> String
+where
+    F: FnOnce(&T) -> &[Trivia],
+{
+    let trailing_trivia = if let Some(semicolon) = semicolon {
+        get_trailing_trivia_token(semicolon)
+    } else {
+        get_trailing_trivia(statement)
     };
 
-    filter_trivia_for_spaces(trivia)
+    filter_trivia_for_comments(trailing_trivia)
 }
 
 #[inline]
@@ -210,14 +230,26 @@ impl Format for Block {
             formatted_code.push_str(&indentation_spacing);
         }
 
-        if let Some((last_statement, semicolon)) = &self.last_statement {
-            formatted_code.push_str(&last_statement.format(indentation, config));
+        if let Some(last_statement) = &self.last_statement {
+            formatted_code.push_str(&last_statement.0.format(indentation, config));
 
-            handle_semicolon(&mut formatted_code, semicolon, indentation, config, || {
-                get_trailing_spaces_last_statement(last_statement)
-            });
+            handle_semicolon(
+                &mut formatted_code,
+                &last_statement.1,
+                indentation,
+                config,
+                || get_trailing_spaces_last_statement(&last_statement.0),
+            );
 
             formatted_code.push_str(&indentation_spacing);
+            formatted_code.push_str(&get_trailing_comments(last_statement, |last_statement| {
+                get_trailing_trivia_last_statement(last_statement)
+            }))
+        } else {
+            formatted_code.push_str(&get_trailing_comments(
+                self.statements.last().unwrap(),
+                |statement| get_trailing_trivia_statement(statement),
+            ))
         }
 
         formatted_code = formatted_code.trim_end().to_string();
