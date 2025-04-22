@@ -60,6 +60,11 @@ impl Format for TableFieldValue {
 
 impl FormatWithArgs<bool> for Table {
     fn format_with(&self, indentation: Indentation, config: &Config, is_type: bool) -> String {
+        if self.0.is_empty() {
+            return self.0.opening_bracket.format(indentation, config)
+                + &self.0.closing_bracket.format(indentation, config);
+        }
+
         let single_line = match config.compact_table {
             CompactTable::Always => true,
             CompactTable::OnlyLiterals => !self.0.iter().all(|item| match &*item.value {
