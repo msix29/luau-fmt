@@ -13,6 +13,7 @@ mod config;
 mod formatter;
 mod traits;
 
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub enum FormattingError {
     ErroneousCst,
 }
