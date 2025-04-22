@@ -11,6 +11,10 @@ impl Format for NumericalFor {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         let mut string = self.for_keyword.format(indentation, config);
         string.push(' ');
+        string.push_str(&self.variable.format(indentation, config));
+        string.push(' ');
+        string.push_str(&self.equal_keyword.format(indentation, config));
+        string.push(' ');
         string.push_str(&self.start.format(indentation, config));
         string.push_str(&self.start_comma.format(indentation, config));
         string.push(' ');
