@@ -67,7 +67,7 @@ impl FormatWithArgs<bool> for Table {
 
         let single_line = match config.compact_table {
             CompactTable::Always => true,
-            CompactTable::OnlyLiterals => !self.0.iter().all(|item| match &*item.value {
+            CompactTable::OnlyLiterals => !self.0.iter().any(|item| match &*item.value {
                 // Should we handle wraps?
                 TableFieldValue::Expression(
                     Expression::Nil(_)
