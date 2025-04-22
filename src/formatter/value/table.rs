@@ -51,8 +51,8 @@ impl Format for TableFieldValue {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         match self {
             TableFieldValue::ERROR => unreachable!(),
-            TableFieldValue::Expression(expression) => expression.format(indentation, config),
-            TableFieldValue::Type(type_value) => type_value.format(indentation, config),
+            TableFieldValue::Expression(expression) => expression.format(indentation + 1, config),
+            TableFieldValue::Type(type_value) => type_value.format(indentation + 1, config),
             TableFieldValue::VariadicValues(token) => token.format(indentation, config),
         }
     }
@@ -75,14 +75,15 @@ impl FormatWithArgs<bool> for Table {
                     | Expression::Number(_)
                     | Expression::String(_),
                     // Should we include `Expression::Var(_)`?
-                ) => false,
-                TableFieldValue::Type(
+                )
+                | TableFieldValue::Type(
                     TypeValue::String(_)
                     | TypeValue::Boolean(_)
                     | TypeValue::Basic { .. }
                     | TypeValue::Module { .. }
                     | TypeValue::Nil(_),
-                ) => false,
+                )
+                | TableFieldValue::VariadicValues(_) => false,
                 _ => true,
             }),
             CompactTable::SingleElement => self.0.len() == 1,
