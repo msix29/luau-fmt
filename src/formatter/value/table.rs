@@ -17,7 +17,7 @@ impl Format for TableKey {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         match self {
             TableKey::ERROR => unreachable!(),
-            TableKey::UndefinedNumber(_) | TableKey::UndefinedString(_) => "".to_string(),
+            TableKey::UndefinedNumber(_) | TableKey::UndefinedString(_) => String::new(),
             TableKey::Simple(token) => {
                 token.format_with(indentation, config, TokenFormatType::Name)
             }
@@ -32,9 +32,16 @@ impl FormatWithArgs<bool> for TableField {
         if self.equal_or_colon.is_none() {
             self.value.format(indentation, config)
         } else if is_type {
-            self.key.format(indentation, config) + ": " + &self.value.format(indentation, config)
+            self.key.format(indentation, config)
+                + &self.equal_or_colon.format(indentation, config)
+                + " "
+                + &self.value.format(indentation, config)
         } else {
-            self.key.format(indentation, config) + " = " + &self.value.format(indentation, config)
+            self.key.format(indentation, config)
+                + " "
+                + &self.equal_or_colon.format(indentation, config)
+                + " "
+                + &self.value.format(indentation, config)
         }
     }
 }

@@ -60,7 +60,7 @@ impl Format for FunctionArgument {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         match self {
             FunctionArgument::Expression(expression) => expression.format(indentation, config),
-            FunctionArgument::VariadicValues(_) => "...".to_string(),
+            FunctionArgument::VariadicValues(token) => token.format(indentation, config),
         }
     }
 }

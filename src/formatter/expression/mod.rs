@@ -81,11 +81,13 @@ impl Format for Expression {
             }
             Expression::TypeCast {
                 expression,
+                operator,
                 cast_to,
-                ..
             } => {
                 expression.format(indentation, config)
-                    + " :: "
+                    + " "
+                    + &operator.format(indentation, config)
+                    + " "
                     + &cast_to.format(indentation, config)
             }
             Expression::IfExpression(if_expression) => if_expression.format(indentation, config),
@@ -147,11 +149,13 @@ impl Expand for Expression {
             }
             Expression::TypeCast {
                 expression,
+                operator,
                 cast_to,
-                ..
             } => {
                 expression.expand(indentation, config)
-                    + " :: "
+                    + " "
+                    + &operator.format(indentation, config)
+                    + " "
                     + &cast_to.format(indentation, config) //TODO
             }
             Expression::IfExpression(if_expression) => if_expression.format(indentation, config), //TODO

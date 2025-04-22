@@ -22,7 +22,7 @@ impl Format for LuauString {
         let string = config.quote_style.apply(self);
 
         if string.len() > config.string_width {
-            let separator = "\\z".to_string()
+            let separator = r"\z".to_string()
                 + &config.newline_style.to_string()
                 + &config.indent_style.to_string(indentation + 1, config);
 
@@ -132,7 +132,7 @@ impl<T: Format> Format for Option<T> {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         match self {
             Some(item) => item.format(indentation, config),
-            None => "".to_string(),
+            None => String::new(),
         }
     }
 }
@@ -140,7 +140,7 @@ impl<A, T: FormatWithArgs<A>> FormatWithArgs<A> for Option<T> {
     fn format_with(&self, indentation: Indentation, config: &Config, args: A) -> String {
         match self {
             Some(item) => item.format_with(indentation, config, args),
-            None => "".to_string(),
+            None => String::new(),
         }
     }
 }

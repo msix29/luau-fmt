@@ -89,7 +89,7 @@ impl Format for GlobalFunction {
 impl Format for Attribute {
     #[inline]
     fn format(&self, indentation: Indentation, config: &Config) -> String {
-        "@".to_string()
+        self.at.format(indentation, config)
             + &self
                 .attribute
                 .format_with(indentation, config, TokenFormatType::Name)
@@ -97,7 +97,7 @@ impl Format for Attribute {
 }
 impl Format for Vec<Attribute> {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
-        self.iter().fold("".to_string(), |str, item| {
+        self.iter().fold(String::new(), |str, item| {
             str + &item.format(indentation, config) + config.newline_style.as_str()
         })
     }
@@ -127,7 +127,7 @@ impl Format for TypeFunction {
             string.push(' ');
             string
         } else {
-            "".to_string()
+            String::new()
         };
 
         string.push_str(&self.type_keyword.format(indentation, config));

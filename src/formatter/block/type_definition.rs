@@ -114,7 +114,7 @@ impl Format for TypeDefinition {
             string.push(' ');
             string
         } else {
-            "".to_string()
+            String::new()
         };
 
         string.push_str(&self.type_keyword.format(indentation, config));

@@ -28,9 +28,10 @@ impl Format for TableAccessKey {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         match self {
             TableAccessKey::Expression(table_key) => table_key.format(indentation, config),
-            TableAccessKey::Name { name, .. } => {
+            TableAccessKey::Name { dot, name } => {
                 //FIXME: What if this is a method?
-                ".".to_string() + &name.format_with(indentation, config, TokenFormatType::Name)
+                dot.format(indentation, config)
+                    + &name.format_with(indentation, config, TokenFormatType::Name)
             }
         }
     }

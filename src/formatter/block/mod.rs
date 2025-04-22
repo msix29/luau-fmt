@@ -95,7 +95,7 @@ impl Format for Block {
             if indentation != 0 {
                 return formatted_code;
             } else {
-                return "".to_string();
+                return String::new();
             }
         }
 
