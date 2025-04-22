@@ -90,7 +90,7 @@ impl Expand for FunctionCallInvoked {
                 colon,
                 method,
             } => {
-                let mut string = table.format(indentation, config);
+                let mut string = table.expand(indentation, config);
                 string.push_str(
                     &(config.newline_style.to_string()
                         + &config.indent_style.to_string(indentation + 1, config)),
@@ -106,12 +106,7 @@ impl Expand for FunctionCallInvoked {
 
 impl Expand for FunctionCall {
     fn expand(&self, indentation: Indentation, config: &Config) -> String {
-        let string = self.invoked.format(indentation, config);
-        if string.len() > config.column_width {
-            self.invoked.expand(indentation, config) + &self.arguments.format(indentation, config)
-        } else {
-            string + &self.arguments.expand(indentation, config)
-        }
+        self.invoked.expand(indentation, config) + &self.arguments.expand(indentation, config)
     }
 }
 
