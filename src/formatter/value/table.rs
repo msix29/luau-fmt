@@ -72,7 +72,11 @@ impl FormatWithArgs<bool> for Table {
                     // Should we include `Expression::Var(_)`?
                 ) => false,
                 TableFieldValue::Type(
-                    TypeValue::String(_) | TypeValue::Boolean(_) | TypeValue::Nil(_),
+                    TypeValue::String(_)
+                    | TypeValue::Boolean(_)
+                    | TypeValue::Basic { .. }
+                    | TypeValue::Module { .. }
+                    | TypeValue::Nil(_),
                 ) => false,
                 _ => true,
             }),
