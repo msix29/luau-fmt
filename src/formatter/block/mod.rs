@@ -17,7 +17,10 @@ use get_trailing_trivia::{
     get_trailing_trivia_expr, get_trailing_trivia_function_call, get_trailing_trivia_token,
     get_trailing_trivia_type,
 };
-use luau_parser::prelude::{Block, Statement, Trivia};
+use luau_parser::{
+    prelude::{Block, Statement, Token, Trivia},
+    types::Print,
+};
 
 use crate::{
     config::{Config, Semicolon},
@@ -76,15 +79,93 @@ fn get_trailing_trivia_statement(statement: &Statement) -> &[Trivia] {
     }
 }
 
-#[inline]
-fn get_trailing_spaces(statement: &Statement) -> String {
-    get_trailing_trivia_statement(statement).iter().fold(
+fn filter_trivia_for_spaces(trivia: &[Trivia]) -> String {
+    trivia.iter().fold(
         String::new(),
         |str, trivia| match trivia {
             Trivia::Spaces(smol_str) => str + smol_str,
             Trivia::Comment(_) => str,
         },
     )
+}
+
+#[inline]
+fn get_trailing_spaces(statement: &Statement) -> String {
+    filter_trivia_for_spaces(get_trailing_trivia_statement(statement))
+}
+
+#[inline]
+fn get_trailing_comments(statement: &Statement) -> String {
+    let mut found_comment = false;
+
+    get_trailing_trivia_statement(statement).iter().fold(
+        String::new(),
+        |str, trivia| match trivia {
+            Trivia::Spaces(smol_str) => {
+                if found_comment {
+                    found_comment = false;
+
+                    str + &smol_str
+                } else {
+                    str
+                }
+            }
+            Trivia::Comment(comment) => {
+                found_comment = true;
+
+                str + &comment.print().trim_end()
+            }
+        },
+    )
+}
+
+fn handle_semicolon<F>(
+    formatted_code: &mut String,
+    semicolon: &Option<Token>,
+    indentation: Indentation,
+    config: &Config,
+    get_trailing_spaces: F,
+) where
+    F: FnOnce() -> String,
+{
+    let spaces = semicolon
+        .as_ref()
+        .map(|semicolon| {
+            get_trailing_trivia_token(semicolon)
+                .iter()
+                .fold(String::new(), |str, trivia| match trivia {
+                    Trivia::Spaces(smol_str) => str + smol_str,
+                    Trivia::Comment(_) => str,
+                })
+        })
+        .unwrap_or_else(get_trailing_spaces);
+
+    let new_lines = spaces.matches('\n').count();
+
+    let spaces = if config.keep_statements_spacing {
+        spaces
+    } else if new_lines >= 2 {
+        // Maximum of 2 new lines (1 empty line) if we
+        // don't preserve user spacing.
+        config.newline_style.to_string().repeat(2)
+    } else {
+        config.newline_style.to_string()
+    };
+
+    match config.semicolon {
+        Semicolon::Keep => {
+            formatted_code.push_str(&semicolon.format(indentation, config));
+        }
+        Semicolon::Always if semicolon.is_some() => {
+            formatted_code.push_str(&semicolon.format(indentation, config));
+        }
+        Semicolon::Always => {
+            formatted_code.push(';');
+        }
+        _ => (),
+    }
+
+    formatted_code.push_str(&spaces);
 }
 
 impl Format for Block {
@@ -107,45 +188,10 @@ impl Format for Block {
         for (statement, semicolon) in self.statements.iter() {
             formatted_code.push_str(&statement.format(indentation, config));
 
-            let spaces = semicolon
-                .as_ref()
-                .map(|semicolon| {
-                    get_trailing_trivia_token(semicolon).iter().fold(
-                        String::new(),
-                        |str, trivia| match trivia {
-                            Trivia::Spaces(smol_str) => str + smol_str,
-                            Trivia::Comment(_) => str,
-                        },
-                    )
-                })
-                .unwrap_or_else(|| get_trailing_spaces(statement));
+            handle_semicolon(&mut formatted_code, semicolon, indentation, config, || {
+                get_trailing_spaces(statement)
+            });
 
-            let new_lines = spaces.matches('\n').count();
-
-            let spaces = if config.keep_statements_spacing {
-                spaces
-            } else if new_lines >= 2 {
-                // Maximum of 2 new lines (1 empty line) if we
-                // don't preserve user spacing.
-                config.newline_style.to_string().repeat(2)
-            } else {
-                config.newline_style.to_string()
-            };
-
-            match config.semicolon {
-                Semicolon::Keep => {
-                    formatted_code.push_str(&semicolon.format(indentation, config));
-                }
-                Semicolon::Always if semicolon.is_some() => {
-                    formatted_code.push_str(&semicolon.format(indentation, config));
-                }
-                Semicolon::Always => {
-                    formatted_code.push(';');
-                }
-                _ => (),
-            }
-
-            formatted_code.push_str(&spaces);
             formatted_code.push_str(&indentation_spacing);
         }
 
