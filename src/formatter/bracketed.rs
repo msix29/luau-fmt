@@ -27,60 +27,58 @@ impl<A, T: FormatWithArgs<A>> FormatWithArgs<A> for Bracketed<T> {
     }
 }
 
-impl<A, T: FormatWithArgs<A>> ExpandWithArgs<A> for Bracketed<T> {
-    fn expand_with(&self, indentation: Indentation, config: &Config, args: A) -> String {
-        let item = self.item.format_with(indentation, config, args);
+macro_rules! expand {
+    (
+        $self: ident,
+        $indentation: ident,
+        $config: ident,
+        let $item_name:ident = $item:expr;
+    ) => {{
+        let $item_name = $item;
 
-        if item.is_empty() {
-            let mut string = self.opening_bracket.format(indentation, config);
-            string.push_str(&item);
-            string.push_str(&self.closing_bracket.format(indentation, config));
+        if $item_name.is_empty() {
+            let mut string = $self.opening_bracket.format($indentation, $config);
+            string.push_str(&$item_name);
+            string.push_str(&$self.closing_bracket.format($indentation, $config));
 
             string
         } else {
-            let mut string = self.opening_bracket.format(indentation, config);
+            let mut string = $self.opening_bracket.format($indentation, $config);
 
             string.push_str(
-                &(config.newline_style.to_string()
-                    + &config.indent_style.to_string(indentation + 1, config)),
+                &($config.newline_style.to_string()
+                    + &$config.indent_style.to_string($indentation + 1, $config)),
             );
-            string.push_str(&item);
+            string.push_str(&$item_name);
             string.push_str(
-                &(config.newline_style.to_string()
-                    + &config.indent_style.to_string(indentation, config)),
+                &($config.newline_style.to_string()
+                    + &$config.indent_style.to_string($indentation, $config)),
             );
-            string.push_str(&self.closing_bracket.format(indentation, config));
+            string.push_str(&$self.closing_bracket.format($indentation, $config));
 
             string
         }
+    }};
+}
+
+impl<A, T: FormatWithArgs<A>> ExpandWithArgs<A> for Bracketed<T> {
+    fn expand_with(&self, indentation: Indentation, config: &Config, args: A) -> String {
+        expand!(
+            self,
+            indentation,
+            config,
+            let item = self.item.format_with(indentation, config, args);
+        )
     }
 }
 
 impl<T: Expand> Expand for Bracketed<T> {
     fn expand(&self, indentation: Indentation, config: &Config) -> String {
-        let item = self.item.expand(indentation, config);
-
-        if item.is_empty() {
-            let mut string = self.opening_bracket.format(indentation, config);
-            string.push_str(&item);
-            string.push_str(&self.closing_bracket.format(indentation, config));
-
-            string
-        } else {
-            let mut string = self.opening_bracket.format(indentation, config);
-
-            string.push_str(
-                &(config.newline_style.to_string()
-                    + &config.indent_style.to_string(indentation + 1, config)),
-            );
-            string.push_str(&item);
-            string.push_str(
-                &(config.newline_style.to_string()
-                    + &config.indent_style.to_string(indentation, config)),
-            );
-            string.push_str(&self.closing_bracket.format(indentation, config));
-
-            string
-        }
+        expand!(
+            self,
+            indentation,
+            config,
+            let item = self.item.expand(indentation, config);
+        )
     }
 }
