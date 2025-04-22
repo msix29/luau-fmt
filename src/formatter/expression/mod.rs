@@ -16,16 +16,10 @@ use crate::{
 
 impl Format for PrefixExp {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
-        let string = match self {
+        match self {
             PrefixExp::Var(var) => var.format(indentation, config),
             PrefixExp::FunctionCall(function_call) => function_call.format(indentation, config),
             PrefixExp::ExpressionWrap(bracketed) => bracketed.format(indentation, config),
-        };
-
-        if string.len() > config.column_width {
-            self.expand(indentation, config)
-        } else {
-            string
         }
     }
 }
@@ -42,7 +36,7 @@ impl Expand for PrefixExp {
 
 impl Format for Expression {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
-        match self {
+        let string = match self {
             Expression::ERROR => unreachable!(),
             Expression::Nil(token)
             | Expression::Boolean(token)
@@ -95,6 +89,72 @@ impl Format for Expression {
                     + &cast_to.format(indentation, config)
             }
             Expression::IfExpression(if_expression) => if_expression.format(indentation, config),
+        };
+
+        if string.len() > config.column_width {
+            self.expand(indentation, config)
+        } else {
+            string
+        }
+    }
+}
+
+impl Expand for Expression {
+    fn expand(&self, indentation: Indentation, config: &Config) -> String {
+        match self {
+            Expression::ERROR => unreachable!(),
+            Expression::Nil(token)
+            | Expression::Boolean(token)
+            | Expression::Number(token)
+            | Expression::String(token) => token.format(indentation, config),
+            Expression::Closure(closure) => closure.format(indentation + 1, config),
+            Expression::FunctionCall(function_call) => function_call.expand(indentation, config),
+            Expression::ExpressionWrap(bracketed) => bracketed.expand(indentation, config),
+            Expression::Var(var) => var.expand(indentation, config),
+            Expression::Table(table) => table.format_with(indentation, config, false),
+            Expression::UnaryExpression {
+                operator,
+                expression,
+            } => {
+                if matches!(operator.token_type, TokenType::Operator(Operator::Not)) {
+                    operator.format(indentation, config)
+                        + " "
+                        + &expression.format(indentation, config)
+                } else {
+                    operator.format(indentation, config) + &expression.format(indentation, config)
+                }
+            }
+            Expression::BinaryExpression {
+                left,
+                operator,
+                right,
+            } => {
+                if matches!(
+                    operator.token_type,
+                    TokenType::Operator(Operator::Exponentiation)
+                ) {
+                    left.format(indentation, config)
+                        + &operator.format(indentation, config)
+                        + &right.format(indentation, config)
+                } else {
+                    left.format(indentation, config)
+                        + config.newline_style.as_str()
+                        + &config.indent_style.to_string(indentation + 1, config)
+                        + &operator.format(indentation, config)
+                        + " "
+                        + &right.format(indentation, config)
+                }
+            }
+            Expression::TypeCast {
+                expression,
+                cast_to,
+                ..
+            } => {
+                expression.expand(indentation, config)
+                    + " :: "
+                    + &cast_to.format(indentation, config) //TODO
+            }
+            Expression::IfExpression(if_expression) => if_expression.format(indentation, config), //TODO
         }
     }
 }
