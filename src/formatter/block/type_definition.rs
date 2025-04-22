@@ -124,7 +124,7 @@ impl Format for TypeDefinition {
                 .type_name
                 .format_with(indentation, config, TokenFormatType::Type),
         );
-        string.push_str(&self.generics.format_with(indentation, config, ""));
+        string.push_str(&self.generics.format_with(indentation, config, ", "));
         string.push(' ');
         string.push_str(&self.equal_sign.format(indentation, config));
         string.push(' ');
