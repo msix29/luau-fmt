@@ -7,23 +7,40 @@ use crate::{
     traits::{Expand, ExpandWithArgs, Format, FormatWithArgs, Indentation},
 };
 
-impl<T: Format> Format for Bracketed<T> {
-    fn format(&self, indentation: Indentation, config: &Config) -> String {
-        let mut string = self.opening_bracket.format(indentation, config);
-        string.push_str(&self.item.format(indentation, config));
-        string.push_str(&self.closing_bracket.format(indentation, config));
+macro_rules! format {
+    (
+        $self: ident,
+        $indentation: ident,
+        $config: ident,
+        $item: expr;
+    ) => {{
+        let mut string = $self.opening_bracket.format($indentation, $config);
+        string.push_str(&$item);
+        string.push_str(&$self.closing_bracket.format($indentation, $config));
 
         string
+    }};
+}
+
+impl<T: Format> Format for Bracketed<T> {
+    fn format(&self, indentation: Indentation, config: &Config) -> String {
+        format!(
+            self,
+            indentation,
+            config,
+            self.item.format(indentation, config);
+        )
     }
 }
 
 impl<A, T: FormatWithArgs<A>> FormatWithArgs<A> for Bracketed<T> {
     fn format_with(&self, indentation: Indentation, config: &Config, args: A) -> String {
-        let mut string = self.opening_bracket.format(indentation, config);
-        string.push_str(&self.item.format_with(indentation, config, args));
-        string.push_str(&self.closing_bracket.format(indentation, config));
-
-        string
+        format!(
+            self,
+            indentation,
+            config,
+            self.item.format_with(indentation, config, args);
+        )
     }
 }
 
