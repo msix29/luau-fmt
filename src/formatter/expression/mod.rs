@@ -94,7 +94,41 @@ impl Format for Expression {
         };
 
         if string.len() > config.column_width {
-            self.expand(indentation, config)
+            // This simple gives priority when expanding. If we have
+            // expr ~= expr and expr ~= expr
+            // without this priority thing, it'll become something like:
+            //
+            // expr
+            //     ~= expr and expr ~= expr
+            //
+            // but with it, it becomes
+            //
+            // expr ~= expr
+            //     and expr ~= expr
+
+            match self {
+                Expression::BinaryExpression {
+                    left,
+                    operator,
+                    right,
+                } => match &**right {
+                    Expression::BinaryExpression {
+                        operator: right_operator,
+                        ..
+                    } => match right_operator.token_type {
+                        TokenType::Operator(Operator::And | Operator::Or) => {
+                            left.format(indentation, config)
+                                + " "
+                                + &operator.format(indentation, config)
+                                + " "
+                                + &right.expand(indentation, config)
+                        }
+                        _ => self.expand(indentation, config),
+                    },
+                    _ => self.expand(indentation, config),
+                },
+                _ => self.expand(indentation, config),
+            }
         } else {
             string
         }
