@@ -98,7 +98,7 @@ impl Format for Attribute {
 impl Format for Vec<Attribute> {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         self.iter().fold("".to_string(), |str, item| {
-            str + &item.format(indentation, config) + "\n"
+            str + &item.format(indentation, config) + config.newline_style.as_str()
         })
     }
 }
