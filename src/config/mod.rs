@@ -92,9 +92,9 @@ impl Default for Config {
             trim_lines: true,
             add_final_newline: true,
 
-            variable_casing: NamingConvention::Camel,
-            method_casing: NamingConvention::Pascal,
-            type_casing: NamingConvention::Pascal,
+            variable_casing: NamingConvention::None,
+            method_casing: NamingConvention::None,
+            type_casing: NamingConvention::None,
         }
     }
 }
