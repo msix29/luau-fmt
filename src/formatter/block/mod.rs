@@ -24,8 +24,9 @@ use crate::{
     traits::{Format, Indentation},
 };
 
-fn get_trailing_spaces(statement: &Statement) -> String {
-    let trivia = match statement {
+#[inline]
+fn get_trailing_trivia_statement(statement: &Statement) -> &[Trivia] {
+    match statement {
         Statement::ERROR => unreachable!(),
         Statement::LocalFunction(local_function) => {
             get_trailing_trivia_token(&local_function.end_keyword)
@@ -72,14 +73,18 @@ fn get_trailing_spaces(statement: &Statement) -> String {
         Statement::TypeFunction(type_function) => {
             get_trailing_trivia_token(&type_function.end_keyword)
         }
-    };
+    }
+}
 
-    trivia
-        .iter()
-        .fold(String::new(), |str, trivia| match trivia {
+#[inline]
+fn get_trailing_spaces(statement: &Statement) -> String {
+    get_trailing_trivia_statement(statement).iter().fold(
+        String::new(),
+        |str, trivia| match trivia {
             Trivia::Spaces(smol_str) => str + smol_str,
             Trivia::Comment(_) => str,
-        })
+        },
+    )
 }
 
 impl Format for Block {
