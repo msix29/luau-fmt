@@ -4,7 +4,7 @@ use luau_parser::types::Bracketed;
 
 use crate::{
     config::Config,
-    traits::{ExpandWithArgs, Format, FormatWithArgs, Indentation},
+    traits::{Expand, ExpandWithArgs, Format, FormatWithArgs, Indentation},
 };
 
 impl<T: Format> Format for Bracketed<T> {
@@ -30,6 +30,35 @@ impl<A, T: FormatWithArgs<A>> FormatWithArgs<A> for Bracketed<T> {
 impl<A, T: FormatWithArgs<A>> ExpandWithArgs<A> for Bracketed<T> {
     fn expand_with(&self, indentation: Indentation, config: &Config, args: A) -> String {
         let item = self.item.format_with(indentation, config, args);
+
+        if item.is_empty() {
+            let mut string = self.opening_bracket.format(indentation, config);
+            string.push_str(&item);
+            string.push_str(&self.closing_bracket.format(indentation, config));
+
+            string
+        } else {
+            let mut string = self.opening_bracket.format(indentation, config);
+
+            string.push_str(
+                &(config.newline_style.to_string()
+                    + &config.indent_style.to_string(indentation + 1, config)),
+            );
+            string.push_str(&item);
+            string.push_str(
+                &(config.newline_style.to_string()
+                    + &config.indent_style.to_string(indentation, config)),
+            );
+            string.push_str(&self.closing_bracket.format(indentation, config));
+
+            string
+        }
+    }
+}
+
+impl<T: Expand> Expand for Bracketed<T> {
+    fn expand(&self, indentation: Indentation, config: &Config) -> String {
+        let item = self.item.expand(indentation, config);
 
         if item.is_empty() {
             let mut string = self.opening_bracket.format(indentation, config);
