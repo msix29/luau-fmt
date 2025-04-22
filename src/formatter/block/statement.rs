@@ -46,6 +46,7 @@ impl Format for TerminationStatement {
 
                 if string.len() > config.column_width {
                     return_keyword.format(indentation, config)
+                        + " "
                         + &expressions.format_with(
                             indentation,
                             config,
@@ -54,7 +55,7 @@ impl Format for TerminationStatement {
                                 + &config.indent_style.to_string(indentation + 1, config)),
                         )
                 } else {
-                    return_keyword.format(indentation, config) + &string
+                    return_keyword.format(indentation, config) + " " + &string
                 }
             }
             TerminationStatement::Break(token)
