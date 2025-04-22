@@ -1,8 +1,8 @@
-use luau_parser::types::Statement;
+use luau_parser::types::{Statement, TerminationStatement};
 
 use crate::{
     config::Config,
-    traits::{Format, Indentation},
+    traits::{Format, FormatWithArgs, Indentation},
 };
 
 impl Format for Statement {
@@ -31,6 +31,38 @@ impl Format for Statement {
                 global_function.format(indentation, config)
             }
             Statement::TypeFunction(type_function) => type_function.format(indentation, config),
+        }
+    }
+}
+
+impl Format for TerminationStatement {
+    fn format(&self, indentation: Indentation, config: &Config) -> String {
+        match self {
+            TerminationStatement::Return {
+                return_keyword,
+                expressions: Some(expressions),
+            } => {
+                let string = expressions.format_with(indentation, config, ", ");
+
+                if string.len() > config.column_width {
+                    return_keyword.format(indentation, config)
+                        + &expressions.format_with(
+                            indentation,
+                            config,
+                            &(",".to_string()
+                                + config.newline_style.as_str()
+                                + &config.indent_style.to_string(indentation + 1, config)),
+                        )
+                } else {
+                    return_keyword.format(indentation, config) + &string
+                }
+            }
+            TerminationStatement::Break(token)
+            | TerminationStatement::Continue(token)
+            | TerminationStatement::Return {
+                return_keyword: token,
+                ..
+            } => token.format(indentation, config),
         }
     }
 }

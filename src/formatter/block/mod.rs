@@ -19,7 +19,7 @@ use get_trailing_trivia::{
 };
 use luau_parser::{
     prelude::{Block, Statement, Token, Trivia},
-    types::Print,
+    types::{Print, TerminationStatement},
 };
 
 use crate::{
@@ -80,13 +80,12 @@ fn get_trailing_trivia_statement(statement: &Statement) -> &[Trivia] {
 }
 
 fn filter_trivia_for_spaces(trivia: &[Trivia]) -> String {
-    trivia.iter().fold(
-        String::new(),
-        |str, trivia| match trivia {
+    trivia
+        .iter()
+        .fold(String::new(), |str, trivia| match trivia {
             Trivia::Spaces(smol_str) => str + smol_str,
             Trivia::Comment(_) => str,
-        },
-    )
+        })
 }
 
 #[inline]
@@ -94,18 +93,35 @@ fn get_trailing_spaces(statement: &Statement) -> String {
     filter_trivia_for_spaces(get_trailing_trivia_statement(statement))
 }
 
+fn get_trailing_spaces_last_statement(last_statement: &TerminationStatement) -> String {
+    let trivia = match last_statement {
+        TerminationStatement::Return {
+            expressions: Some(expressions),
+            ..
+        } => get_trailing_trivia_expr(expressions.last().unwrap()),
+        TerminationStatement::Break(token)
+        | TerminationStatement::Continue(token)
+        | TerminationStatement::Return {
+            return_keyword: token,
+            ..
+        } => get_trailing_trivia_token(token),
+    };
+
+    filter_trivia_for_spaces(trivia)
+}
+
 #[inline]
-fn get_trailing_comments(statement: &Statement) -> String {
+pub(crate) fn filter_trivia_for_comments(trivia: &[Trivia]) -> String {
     let mut found_comment = false;
 
-    get_trailing_trivia_statement(statement).iter().fold(
-        String::new(),
-        |str, trivia| match trivia {
+    trivia
+        .iter()
+        .fold(String::new(), |str, trivia| match trivia {
             Trivia::Spaces(smol_str) => {
                 if found_comment {
                     found_comment = false;
 
-                    str + &smol_str
+                    str + smol_str
                 } else {
                     str
                 }
@@ -113,10 +129,9 @@ fn get_trailing_comments(statement: &Statement) -> String {
             Trivia::Comment(comment) => {
                 found_comment = true;
 
-                str + &comment.print().trim_end()
+                str + comment.print().trim_end()
             }
-        },
-    )
+        })
 }
 
 fn handle_semicolon<F>(
@@ -190,6 +205,16 @@ impl Format for Block {
 
             handle_semicolon(&mut formatted_code, semicolon, indentation, config, || {
                 get_trailing_spaces(statement)
+            });
+
+            formatted_code.push_str(&indentation_spacing);
+        }
+
+        if let Some((last_statement, semicolon)) = &self.last_statement {
+            formatted_code.push_str(&last_statement.format(indentation, config));
+
+            handle_semicolon(&mut formatted_code, semicolon, indentation, config, || {
+                get_trailing_spaces_last_statement(last_statement)
             });
 
             formatted_code.push_str(&indentation_spacing);
