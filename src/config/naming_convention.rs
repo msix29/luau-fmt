@@ -1,7 +1,7 @@
 //! [`NamingConvention`] enum.
 
 /// Different naming conventions
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub enum NamingConvention {
     // `camelCase`.
     Camel,
@@ -11,6 +11,10 @@ pub enum NamingConvention {
 
     /// `snake_case`
     Snake,
+
+    /// Keep it as it is.
+    #[default]
+    None,
 }
 
 #[inline]
@@ -45,31 +49,34 @@ fn capitalize_first_letter(word: &mut str) -> &str {
 
 impl NamingConvention {
     pub fn apply(&self, identifier: &str) -> String {
+        if *self == Self::None {
+            return identifier.to_string()
+        }
+
         let mut words = get_words(identifier);
 
         match self {
             NamingConvention::Camel => words
-                .iter_mut()
-                .enumerate()
-                .map(|(i, word)| {
-                    if i == 0 {
-                        word.to_lowercase()
-                    } else {
-                        capitalize_first_letter(word).to_string()
-                    }
-                })
-                .collect::<String>(),
-
+                        .iter_mut()
+                        .enumerate()
+                        .map(|(i, word)| {
+                            if i == 0 {
+                                word.to_lowercase()
+                            } else {
+                                capitalize_first_letter(word).to_string()
+                            }
+                        })
+                        .collect::<String>(),
             NamingConvention::Pascal => words
-                .iter_mut()
-                .map(|word| capitalize_first_letter(word))
-                .collect::<String>(),
-
+                        .iter_mut()
+                        .map(|word| capitalize_first_letter(word))
+                        .collect::<String>(),
             NamingConvention::Snake => words
-                .iter()
-                .map(|word| word.to_lowercase())
-                .collect::<Vec<String>>()
-                .join("_"),
-        }
+                        .iter()
+                        .map(|word| word.to_lowercase())
+                        .collect::<Vec<String>>()
+                        .join("_"),
+            NamingConvention::None => unreachable!(),
+                        }
     }
 }

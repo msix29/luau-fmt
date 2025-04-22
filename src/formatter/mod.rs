@@ -13,7 +13,7 @@ use luau_parser::{
 };
 
 use crate::{
-    config::Config,
+    config::{Config, NamingConvention},
     traits::{Expand, Format, FormatWithArgs, Indentation},
 };
 
@@ -89,7 +89,7 @@ impl FormatWithArgs<TokenFormatType> for Token {
                 TokenFormatType::Type => config.type_casing.apply(identifier),
                 TokenFormatType::Method => config.method_casing.apply(identifier),
                 TokenFormatType::Name => config.variable_casing.apply(identifier),
-                TokenFormatType::None => unreachable!(),
+                TokenFormatType::None => NamingConvention::None.apply(identifier),
             },
 
             // `unwrap` itself is safe and should never error as this will only be
