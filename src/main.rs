@@ -57,10 +57,16 @@ pub fn format_path<P: AsRef<Path>>(path: P, config: &Config) -> io::Result<()> {
 #[command(version = VERSION)]
 struct Cli {
     path: PathBuf,
+    config_path: Option<PathBuf>,
 }
 
 fn main() -> io::Result<()> {
     let args = Cli::parse();
+    let config = if let Some(path) = &args.config_path {
+        load_config(path).unwrap_or_default()
+    } else {
+        Config::default()
+    };
 
-    format_path(&args.path, &load_config(&args.path).unwrap_or_default())
+    format_path(&args.path, &config)
 }
