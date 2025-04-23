@@ -113,14 +113,12 @@ impl FormatWithArgs<bool> for Table {
                         string.len() - separator.len()..string.len() - separator.len() + 1,
                         "",
                     );
-                }
-            }
-            TrailingCommas::Always if !string.ends_with(&separator) => string.push_str(&separator),
-            TrailingCommas::Always => {
-                if !string.ends_with(&separator) {
+                } else {
                     string.push_str(&spaces);
                 }
             }
+            TrailingCommas::Always if !string.ends_with(&separator) => string.push_str(&separator),
+            TrailingCommas::Always => {}
         }
 
         if !single_line {
