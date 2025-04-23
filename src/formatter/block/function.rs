@@ -13,7 +13,7 @@ use luau_parser::types::{
 use crate::{
     config::Config,
     formatter::TokenFormatType,
-    traits::{Expand, Format, FormatWithArgs, Indentation},
+    traits::{Expand, ExpandWithArgs, Format, FormatWithArgs, Indentation},
 };
 
 impl Format for LocalFunction {
