@@ -15,40 +15,105 @@ use luau_parser::types::{
 use crate::{
     config::Config,
     formatter::TokenFormatType,
-    traits::{Format, FormatWithArgs, Indentation},
+    traits::{Expand, ExpandWithArgs, Format, FormatWithArgs, Indentation},
 };
+
+fn format_type_value(type_value: &TypeValue, indentation: Indentation, config: &Config) -> String {
+    match type_value {
+        TypeValue::ERROR => unreachable!(),
+        TypeValue::String(token) | TypeValue::Boolean(token) | TypeValue::Nil(token) => {
+            token.format(indentation, config)
+        }
+        TypeValue::Wrap(bracketed) => bracketed.format(indentation, config),
+        TypeValue::Function {
+            generics,
+            parameters,
+            arrow,
+            return_type,
+        } => {
+            let mut string = generics.format_with(indentation, config, ", ");
+
+            handle_parameters_and_returns!(
+                (parameters, + ' ' + Some(arrow), return_type),
+                string,
+                indentation,
+                config
+            );
+
+            string
+        }
+        TypeValue::Basic { base, generics } => {
+            base.format_with(indentation, config, TokenFormatType::Type)
+                + &generics.format_with(indentation, config, ", ")
+        }
+        TypeValue::GenericPack { name, ellipsis } => {
+            name.format_with(indentation, config, TokenFormatType::Type)
+                + &ellipsis.format(indentation, config)
+        }
+        TypeValue::Intersection {
+            left,
+            ampersand: token,
+            right,
+        }
+        | TypeValue::Union {
+            left,
+            pipe: token,
+            right,
+        } => {
+            left.format(indentation, config)
+                + " "
+                + &token.format(indentation, config)
+                + " "
+                + &right.format(indentation, config)
+        }
+        TypeValue::Module {
+            module,
+            dot,
+            name,
+            generics,
+        } => {
+            module.format_with(indentation, config, TokenFormatType::Name)
+                + &dot.format(indentation, config)
+                + &name.format_with(indentation, config, TokenFormatType::Type)
+                + &generics.format_with(indentation, config, ", ")
+        }
+        TypeValue::Optional {
+            base,
+            question_mark,
+        } => base.format(indentation, config) + &question_mark.format(indentation, config),
+        TypeValue::Table(table) => table.format_with(indentation, config, true),
+        TypeValue::Typeof {
+            typeof_token,
+            inner,
+        } => typeof_token.format(indentation, config) + &inner.format(indentation, config),
+        TypeValue::Tuple(bracketed) => bracketed.format_with(indentation, config, ", "),
+        TypeValue::Variadic {
+            ellipsis,
+            type_value,
+        } => ellipsis.format(indentation, config) + &type_value.format(indentation, config),
+        TypeValue::VariadicPack { ellipsis, name } => {
+            ellipsis.format(indentation, config)
+                + &name.format_with(indentation, config, TokenFormatType::Type)
+        }
+    }
+}
 
 impl Format for TypeValue {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
-        match self {
-            Self::ERROR => unreachable!(),
-            Self::String(token) | Self::Boolean(token) | Self::Nil(token) => {
-                token.format(indentation, config)
-            }
-            Self::Wrap(bracketed) => bracketed.format(indentation, config),
-            Self::Function {
-                generics,
-                parameters,
-                arrow,
-                return_type,
-            } => {
-                let mut string = generics.format_with(indentation, config, ", ");
-                string.push_str(&parameters.format_with(indentation, config, ", "));
-                string.push(' ');
-                string.push_str(&arrow.format(indentation, config));
-                string.push(' ');
-                string.push_str(&return_type.format(indentation, config));
+        let string = format_type_value(self, indentation, config);
 
-                string
-            }
-            Self::Basic { base, generics } => {
-                base.format_with(indentation, config, TokenFormatType::Type)
-                    + &generics.format_with(indentation, config, ", ")
-            }
-            Self::GenericPack { name, ellipsis } => {
-                name.format_with(indentation, config, TokenFormatType::Type)
-                    + &ellipsis.format(indentation, config)
-            }
+        if string.len() > config.column_width {
+            self.expand(indentation, config)
+        } else {
+            string
+        }
+    }
+}
+
+impl Expand for TypeValue {
+    fn expand(&self, indentation: Indentation, config: &Config) -> String {
+        match self {
+            Self::Wrap(bracketed) => bracketed.expand(indentation, config),
             Self::Intersection {
                 left,
                 ampersand: token,
@@ -60,32 +125,24 @@ impl Format for TypeValue {
                 right,
             } => {
                 left.format(indentation, config)
-                    + " "
+                    + config.newline_style.as_str()
+                    + &config.indent_style.to_string(indentation + 1, config)
                     + &token.format(indentation, config)
                     + " "
                     + &right.format(indentation, config)
             }
-            Self::Module {
-                module,
-                dot,
-                name,
-                generics,
-            } => {
-                module.format_with(indentation, config, TokenFormatType::Name)
-                    + &dot.format(indentation, config)
-                    + &name.format_with(indentation, config, TokenFormatType::Type)
-                    + &generics.format_with(indentation, config, ", ")
-            }
-            Self::Optional {
-                base,
-                question_mark,
-            } => base.format(indentation, config) + &question_mark.format(indentation, config),
             Self::Table(table) => table.format_with(indentation, config, true),
             Self::Typeof {
                 typeof_token,
                 inner,
-            } => typeof_token.format(indentation, config) + &inner.format(indentation, config),
-            Self::Tuple(bracketed) => bracketed.format_with(indentation, config, ", "),
+            } => typeof_token.format(indentation, config) + &inner.expand(indentation, config),
+            Self::Tuple(bracketed) => bracketed.format_with(
+                indentation,
+                config,
+                &(",".to_string()
+                    + &config.newline_style.to_string()
+                    + &config.indent_style.to_string(indentation + 1, config)),
+            ),
             Self::Variadic {
                 ellipsis,
                 type_value,
@@ -94,6 +151,7 @@ impl Format for TypeValue {
                 ellipsis.format(indentation, config)
                     + &name.format_with(indentation, config, TokenFormatType::Type)
             }
+            _ => format_type_value(self, indentation, config),
         }
     }
 }
