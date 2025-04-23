@@ -95,7 +95,7 @@ fn get_trailing_trivia_last_statement(last_statement: &TerminationStatement) -> 
     }
 }
 
-fn filter_trivia_for_spaces(trivia: &[Trivia]) -> String {
+pub(crate) fn filter_trivia_for_spaces(trivia: &[Trivia]) -> String {
     trivia
         .iter()
         .fold(String::new(), |str, trivia| match trivia {
