@@ -51,9 +51,7 @@ impl Format for FunctionArguments {
             FunctionArguments::Table(table) => {
                 " ".to_string() + &table.format_with(indentation, config, false)
             }
-            FunctionArguments::List(bracketed) => {
-                bracketed.format_with(indentation, config, ", ")
-            }
+            FunctionArguments::List(bracketed) => bracketed.format_with(indentation, config, ", "),
         }
     }
 }
@@ -99,8 +97,13 @@ impl Expand for FunctionCallInvoked {
 impl Expand for FunctionCall {
     fn expand(&self, indentation: Indentation, config: &Config) -> String {
         let string = self.invoked.format(indentation, config);
+        let arguments = self.arguments.format(indentation, config);
+
         if string.len() > config.column_width {
-            self.invoked.expand(indentation, config) + &self.arguments.format(indentation, config)
+            self.invoked.expand(indentation, config) + &arguments
+        } else if arguments.find('\n') != arguments.rfind('\n') {
+            // This is most likely a closure, no need to expand.
+            string + &arguments
         } else {
             string + &self.arguments.expand(indentation, config)
         }
