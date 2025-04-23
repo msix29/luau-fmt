@@ -19,7 +19,9 @@ reexport!(
 );
 
 /// Struct representing the config file.
+#[rustfmt::skip]
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct Config {
     /// The maximum width of characters per line.
     pub column_width: usize,

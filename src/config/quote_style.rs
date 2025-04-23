@@ -7,7 +7,9 @@ use luau_parser::prelude::LuauString;
 /// # Note
 ///
 /// This doesn't affect backticks (interpolated strings).
+#[rustfmt::skip]
 #[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub enum QuoteStyle {
     /// Always use single quotes.
     Single,

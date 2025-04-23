@@ -1,4 +1,6 @@
+#[rustfmt::skip]
 #[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub enum TrailingCommas {
     /// Always have trailing commas.
     Always,

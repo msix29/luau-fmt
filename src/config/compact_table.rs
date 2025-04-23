@@ -3,7 +3,9 @@
 use luau_parser::types::{Expression, Table, TableFieldValue, TypeValue, Var};
 
 /// Enum representing when tables should use the compact form (be on one line).
+#[rustfmt::skip]
 #[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub enum CompactTable {
     /// Always wrap the table to one line.
     Always,

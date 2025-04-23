@@ -8,7 +8,9 @@ use super::Config;
 pub type IndentSize = usize;
 
 /// Styles for indentation
+#[rustfmt::skip]
 #[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub enum IndentStyle {
     /// Use spaces where each tab is <n> spaces.
     #[default]

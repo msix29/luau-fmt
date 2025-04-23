@@ -7,6 +7,8 @@
 
 pub use config::Config;
 use luau_parser::types::Cst;
+use std::{fs, io::Error as IoError, path::Path};
+use toml::de::Error as TomlError;
 use traits::Format;
 
 mod config;
@@ -32,4 +34,29 @@ pub fn format_with_config(cst: &Cst, config: &Config) -> Result<String, Formatti
     } else {
         Ok(cst.block.format(0, config))
     }
+}
+
+pub enum LoadConfigError {
+    Io(IoError),
+    Toml(TomlError),
+}
+
+impl From<IoError> for LoadConfigError {
+    #[inline]
+    fn from(value: IoError) -> Self {
+        Self::Io(value)
+    }
+}
+impl From<TomlError> for LoadConfigError {
+    #[inline]
+    fn from(value: TomlError) -> Self {
+        Self::Toml(value)
+    }
+}
+
+#[inline]
+pub fn load_config<P: AsRef<Path>>(path: P) -> Result<Config, LoadConfigError> {
+    fs::read_to_string(path)
+        .map(|content| toml::from_str(&content))?
+        .map_err(From::from)
 }

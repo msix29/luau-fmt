@@ -1,7 +1,9 @@
 //! [`NamingConvention`] enum.
 
 /// Different naming conventions
+#[rustfmt::skip]
 #[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub enum NamingConvention {
     // `camelCase`.
     Camel,
