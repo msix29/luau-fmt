@@ -103,7 +103,7 @@ impl FormatWithArgs<bool> for Table {
             TrailingCommas::OnlyMultiLine => {
                 let ends_with_separator = string.ends_with(&separator);
                 if !single_line {
-                    if ends_with_separator {
+                    if !ends_with_separator {
                         string.push_str(&separator)
                     }
                 } else if ends_with_separator {
