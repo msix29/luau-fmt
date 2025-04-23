@@ -4,44 +4,48 @@
 //! * [`ElseStatement`]
 //! * [`ElseIfStatement`]
 
-use luau_parser::types::{ElseIfStatement, ElseStatement, IfStatement};
+use std::rc::Rc;
+
+use luau_parser::types::{ElseIfStatement, ElseStatement, Expression, IfStatement};
 
 use crate::{
     config::Config,
     traits::{Format, Indentation},
 };
 
+fn handle_condition(
+    string: &mut String,
+    condition: &Rc<Expression>,
+    indentation: Indentation,
+    config: &Config,
+) {
+    let condition = condition.format(indentation, config);
+    let is_condition_multiline = condition.contains(config.newline_style.as_str());
+
+    if is_condition_multiline {
+        string.push_str(
+            &(config.newline_style.to_string()
+                + &config.indent_style.to_string(indentation + 1, config)),
+        );
+    }
+
+    string.push_str(&condition);
+
+    if is_condition_multiline {
+        string.push_str(
+            &(config.newline_style.to_string()
+                + &config.indent_style.to_string(indentation, config)),
+        );
+    } else {
+        string.push(' ');
+    }
+}
+
 impl Format for IfStatement {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         let mut string = self.if_keyword.format(indentation, config);
         string.push(' ');
-
-        let is_condition_multiline;
-        {
-            let condition = self.condition.format(indentation, config);
-
-            if condition.contains(config.newline_style.as_str()) {
-                is_condition_multiline = true;
-
-                string.push_str(
-                    &(config.newline_style.to_string()
-                        + &config.indent_style.to_string(indentation + 1, config)),
-                );
-            } else {
-                is_condition_multiline = false
-            }
-
-            string.push_str(&condition);
-
-            if is_condition_multiline {
-                string.push_str(
-                    &(config.newline_style.to_string()
-                        + &config.indent_style.to_string(indentation, config)),
-                );
-            } else {
-                string.push(' ');
-            }
-        }
+        handle_condition(&mut string, &self.condition, indentation, config);
         string.push_str(&self.then_keyword.format(indentation, config));
         string.push_str(&self.body.format(indentation + 1, config));
 
@@ -59,8 +63,7 @@ impl Format for ElseIfStatement {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         let mut string = self.elseif_keyword.format(indentation, config);
         string.push(' ');
-        string.push_str(&self.condition.format(indentation, config));
-        string.push(' ');
+        handle_condition(&mut string, &self.condition, indentation, config);
         string.push_str(&self.then_keyword.format(indentation, config));
         string.push_str(&self.body.format(indentation + 1, config));
 
