@@ -24,7 +24,7 @@ fn format_type_value(type_value: &TypeValue, indentation: Indentation, config: &
         TypeValue::String(token) | TypeValue::Boolean(token) | TypeValue::Nil(token) => {
             token.format(indentation, config)
         }
-        TypeValue::Wrap(bracketed) => bracketed.format(indentation, config),
+        TypeValue::Wrap(bracketed) => bracketed.format(indentation + 1, config),
         TypeValue::Function {
             generics,
             parameters,
@@ -86,7 +86,7 @@ fn format_type_value(type_value: &TypeValue, indentation: Indentation, config: &
             typeof_token,
             inner,
         } => typeof_token.format(indentation, config) + &inner.format(indentation, config),
-        TypeValue::Tuple(bracketed) => bracketed.format_with(indentation, config, ", "),
+        TypeValue::Tuple(bracketed) => bracketed.format_with(indentation + 1, config, ", "),
         TypeValue::Variadic {
             ellipsis,
             type_value,
@@ -113,7 +113,7 @@ impl Format for TypeValue {
 impl Expand for TypeValue {
     fn expand(&self, indentation: Indentation, config: &Config) -> String {
         match self {
-            Self::Wrap(bracketed) => bracketed.expand(indentation, config),
+            Self::Wrap(bracketed) => bracketed.expand(indentation + 1, config),
             Self::Intersection {
                 left,
                 ampersand: token,
@@ -135,9 +135,9 @@ impl Expand for TypeValue {
             Self::Typeof {
                 typeof_token,
                 inner,
-            } => typeof_token.format(indentation, config) + &inner.expand(indentation, config),
-            Self::Tuple(bracketed) => bracketed.format_with(
-                indentation,
+            } => typeof_token.format(indentation, config) + &inner.expand(indentation + 1, config),
+            Self::Tuple(bracketed) => bracketed.expand_with(
+                indentation + 1,
                 config,
                 &(",".to_string()
                     + &config.newline_style.to_string()

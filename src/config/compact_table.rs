@@ -1,6 +1,6 @@
 //! [`CompactTable`] enum.
 
-use luau_parser::types::{Expression, Table, TableFieldValue, TypeValue};
+use luau_parser::types::{Expression, Table, TableFieldValue, TypeValue, Var};
 
 /// Enum representing when tables should use the compact form (be on one line).
 #[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
@@ -29,6 +29,7 @@ impl CompactTable {
             | Expression::BinaryExpression { .. }
             | Expression::TypeCast { .. }
             | Expression::Number(_)
+            | Expression::Var(Var::Name(_))
             | Expression::String(_) => true,
             Expression::ExpressionWrap(wrap) => self.is_literal_expression(&wrap.item),
             Expression::Table(table) => self.should_be_single_line(table),
@@ -61,7 +62,6 @@ impl CompactTable {
         match self {
             CompactTable::Always => true,
             CompactTable::OnlyLiterals => !table.0.iter().any(|item| match &*item.value {
-                // Should we handle wraps?
                 TableFieldValue::Expression(expression)
                     if self.is_literal_expression(expression) =>
                 {

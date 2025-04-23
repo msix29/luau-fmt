@@ -52,7 +52,7 @@ impl Format for TerminationStatement {
                             config,
                             &(",".to_string()
                                 + config.newline_style.as_str()
-                                + &config.indent_style.to_string(indentation + 1, config)),
+                                + &config.indent_style.to_string(indentation, config)),
                         )
                 } else {
                     return_keyword.format(indentation, config) + " " + &string

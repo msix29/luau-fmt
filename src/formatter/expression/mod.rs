@@ -19,7 +19,7 @@ impl Format for PrefixExp {
         match self {
             PrefixExp::Var(var) => var.format(indentation, config),
             PrefixExp::FunctionCall(function_call) => function_call.format(indentation, config),
-            PrefixExp::ExpressionWrap(bracketed) => bracketed.format(indentation, config),
+            PrefixExp::ExpressionWrap(bracketed) => bracketed.format(indentation + 1, config),
         }
     }
 }
@@ -44,7 +44,7 @@ impl Format for Expression {
             | Expression::String(token) => token.format(indentation, config),
             Expression::Closure(closure) => closure.format(indentation, config),
             Expression::FunctionCall(function_call) => function_call.format(indentation, config),
-            Expression::ExpressionWrap(bracketed) => bracketed.format(indentation, config),
+            Expression::ExpressionWrap(bracketed) => bracketed.format(indentation + 1, config),
             Expression::Var(var) => var.format(indentation, config),
             Expression::Table(table) => table.format_with(indentation, config, false),
             Expression::UnaryExpression {
@@ -145,7 +145,7 @@ impl Expand for Expression {
             | Expression::String(token) => token.format(indentation, config),
             Expression::Closure(closure) => closure.format(indentation, config), //TODO
             Expression::FunctionCall(function_call) => function_call.expand(indentation, config),
-            Expression::ExpressionWrap(bracketed) => bracketed.expand(indentation, config),
+            Expression::ExpressionWrap(bracketed) => bracketed.expand(indentation + 1, config),
             Expression::Var(var) => var.expand(indentation, config),
             Expression::Table(table) => table.format_with(indentation, config, false),
             Expression::UnaryExpression {

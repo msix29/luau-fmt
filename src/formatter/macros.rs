@@ -7,11 +7,11 @@ macro_rules! handle_parameters_and_returns {
     ) => {
         let start = $string.rfind('\n').unwrap_or_default();
         {
-            let parameters = $parameters.format_with($indentation, $config, ", ");
+            let parameters = $parameters.format_with($indentation + 1, $config, ", ");
 
             if $string.len() + parameters.len() - start > $config.column_width {
                 $string.push_str(&$parameters.expand_with(
-                    $indentation,
+                    $indentation + 1,
                     $config,
                     &(",".to_string()
                         + $config.newline_style.as_str()

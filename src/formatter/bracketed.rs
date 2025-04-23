@@ -64,12 +64,12 @@ macro_rules! expand {
 
             string.push_str(
                 &($config.newline_style.to_string()
-                    + &$config.indent_style.to_string($indentation + 1, $config)),
+                    + &$config.indent_style.to_string($indentation, $config)),
             );
             string.push_str(&$item_name);
             string.push_str(
                 &($config.newline_style.to_string()
-                    + &$config.indent_style.to_string($indentation, $config)),
+                    + &$config.indent_style.to_string($indentation.saturating_sub(1), $config)),
             );
             string.push_str(&$self.closing_bracket.format($indentation, $config));
 

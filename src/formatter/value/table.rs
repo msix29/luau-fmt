@@ -21,8 +21,8 @@ impl Format for TableKey {
             TableKey::Simple(token) => {
                 token.format_with(indentation, config, TokenFormatType::Name)
             }
-            TableKey::Expression(bracketed) => bracketed.format(indentation, config),
-            TableKey::Type(bracketed) => bracketed.format(indentation, config),
+            TableKey::Expression(bracketed) => bracketed.format(indentation + 1, config),
+            TableKey::Type(bracketed) => bracketed.format(indentation + 1, config),
         }
     }
 }
