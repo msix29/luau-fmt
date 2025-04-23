@@ -5,10 +5,10 @@
 //! * [`TableFieldValue`]
 //! * [`Table`]
 
-use luau_parser::types::{Expression, Table, TableField, TableFieldValue, TableKey, TypeValue};
+use luau_parser::types::{Table, TableField, TableFieldValue, TableKey};
 
 use crate::{
-    config::{CompactTable, Config, TrailingCommas},
+    config::{Config, TrailingCommas},
     formatter::TokenFormatType,
     traits::{Format, FormatWithArgs, Indentation},
 };
@@ -65,31 +65,7 @@ impl FormatWithArgs<bool> for Table {
                 + &self.0.closing_bracket.format(indentation, config);
         }
 
-        let single_line = match config.compact_table {
-            CompactTable::Always => true,
-            CompactTable::OnlyLiterals => !self.0.iter().any(|item| match &*item.value {
-                // Should we handle wraps?
-                TableFieldValue::Expression(
-                    Expression::Nil(_)
-                    | Expression::Boolean(_)
-                    | Expression::Number(_)
-                    | Expression::String(_),
-                    // Should we include `Expression::Var(_)`?
-                )
-                | TableFieldValue::Type(
-                    TypeValue::String(_)
-                    | TypeValue::Boolean(_)
-                    | TypeValue::Basic { .. }
-                    | TypeValue::Module { .. }
-                    | TypeValue::Nil(_),
-                )
-                | TableFieldValue::VariadicValues(_) => false,
-                _ => true,
-            }),
-            CompactTable::SingleElement => self.0.len() == 1,
-            CompactTable::Never => false,
-        };
-
+        let single_line = config.compact_table.should_be_single_line(self);
         let spaces = if single_line {
             " ".to_string()
         } else {
