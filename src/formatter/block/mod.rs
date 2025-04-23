@@ -207,15 +207,20 @@ impl Format for Block {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         let indentation_spacing = config.indent_style.to_string(indentation, config);
 
+        if self.is_empty() {
+            return if indentation == 0 {
+                String::new()
+            } else {
+                config.newline_style.to_string()
+                    + &config.indent_style.to_string(indentation - 1, config)
+            };
+        }
+
         let mut formatted_code = if indentation == 0 {
             String::new()
         } else {
             config.newline_style.to_string() + &config.indent_style.to_string(indentation, config)
         };
-
-        if self.is_empty() {
-            return formatted_code;
-        }
 
         for (statement, semicolon) in self.statements.iter() {
             formatted_code.push_str(&statement.format(indentation, config));
