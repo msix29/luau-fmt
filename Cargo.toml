@@ -1,5 +1,5 @@
 [package]
-name = "luau-formatter"
+name = "luau-fmt"
 version = "0.1.0"
 edition = "2024"
 
@@ -8,3 +8,7 @@ clap = { version = "4.5.37", features = ["derive"] }
 luau-parser = "0.2.4"
 serde = { version = "1.0.219", features = ["derive"] }
 toml = "0.8.20"
+
+[[bin]]
+name = "luaufmt"
+path = "src/main.rs"

@@ -1,5 +1,5 @@
 use clap::Parser as ClapParser;
-use luau_formatter::{Config, format_with_config, load_config};
+use luau_fmt::{Config, format_with_config, load_config};
 use luau_parser::parser::Parser as LuauParser;
 use std::{
     fs, io,
