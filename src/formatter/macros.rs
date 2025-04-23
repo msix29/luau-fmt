@@ -1,26 +1,41 @@
 macro_rules! handle_parameters_and_returns {
-    ($self: ident, $string: ident, $indentation: ident, $config: ident) => {{
-        let parameters = $self.parameters.format_with($indentation, $config, ", ");
+    (
+        ( $parameters:expr, $(+ $space:literal +)? $symbol:expr, $return_type:expr ),
+        $string: ident,
+        $indentation: ident,
+        $config: ident
+    ) => {
+        let start = $string.rfind('\n').unwrap_or_default();
+        {
+            let parameters = $parameters.format_with($indentation, $config, ", ");
 
-        if $string.len() + parameters.len() > $config.column_width {
-            $string.push_str(&$self.parameters.format_with($indentation, $config, ","));
-        } else {
-            $string.push_str(&parameters);
+            if $string.len() + parameters.len() - start > $config.column_width {
+                $string.push_str(&$parameters.expand_with(
+                    $indentation,
+                    $config,
+                    &(",".to_string()
+                        + $config.newline_style.as_str()
+                        + &$config.indent_style.to_string($indentation + 1, $config))
+                ));
+            } else {
+                $string.push_str(&parameters);
+            }
         }
-    }
 
-    if $self.colon.is_some() {
-        $string.push_str(&$self.colon.format($indentation, $config));
-        $string.push(' ');
+        if let Some(symbol) = &$symbol {
+            $( $string.push($space); )?
+            $string.push_str(&symbol.format($indentation, $config));
+            $string.push(' ');
 
-        let returns = $self.return_type.format($indentation, $config);
+            let returns = $return_type.format($indentation, $config);
 
-        if $string.len() + returns.len() > $config.column_width {
-            $string.push_str(&$self.return_type.expand($indentation, $config));
-        } else {
-            $string.push_str(&returns);
+            if $string.len() + returns.len() - start > $config.column_width {
+                $string.push_str(&$return_type.expand($indentation, $config));
+            } else {
+                $string.push_str(&returns);
+            }
         }
-    }};
+    };
 }
 
 macro_rules! format_function_start_inner {
@@ -35,7 +50,7 @@ macro_rules! format_function_start_inner {
     };
     ($self: ident, $indentation: ident, $config: ident) => {
         $self.attributes.format($indentation, $config)
-    }
+    };
 }
 
 macro_rules! format_function {
@@ -59,7 +74,12 @@ macro_rules! format_function {
             string.push_str(&$self.$function_name.format($indentation, $config));
         )?
         string.push_str(&$self.generics.format_with($indentation, $config, ", "));
-        handle_parameters_and_returns!($self, string, $indentation, $config);
+        handle_parameters_and_returns!(
+            ($self.parameters, $self.colon, $self.return_type),
+            string,
+            $indentation,
+            $config
+        );
         string.push_str(&$self.body.format($indentation + 1, $config));
         string.push_str(&$self.end_keyword.format($indentation, $config));
 
