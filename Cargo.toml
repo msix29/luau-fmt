@@ -5,6 +5,4 @@ edition = "2024"
 
 [dependencies]
 clap = { version = "4.5.37", features = ["derive"] }
-lazy_static = "1.5.0"
-luau-parser = { path = "../parser", default-features = false }
-regex = "1.10.6"
+luau-parser = "0.2.4"
