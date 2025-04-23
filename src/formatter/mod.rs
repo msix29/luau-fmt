@@ -1,5 +1,8 @@
 //! All `impl` blocks for CST-related types.
 
+#[macro_use]
+mod macros;
+
 mod block;
 mod bracketed;
 mod expression;
@@ -140,6 +143,15 @@ impl<A, T: FormatWithArgs<A>> FormatWithArgs<A> for Option<T> {
     fn format_with(&self, indentation: Indentation, config: &Config, args: A) -> String {
         match self {
             Some(item) => item.format_with(indentation, config, args),
+            None => String::new(),
+        }
+    }
+}
+
+impl<T: Expand> Expand for Option<T> {
+    fn expand(&self, indentation: Indentation, config: &Config) -> String {
+        match self {
+            Some(item) => item.expand(indentation, config),
             None => String::new(),
         }
     }
