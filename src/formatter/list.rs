@@ -78,8 +78,10 @@ impl<A, T: FormatWithArgs<A>> FormatWithArgs<(&str, A)> for ListItem<T> {
                     // second one without including the separator itself
                     // (which is just the first character).
                     string
-                        + separator.trim_end_matches(&config.indent_style.to_string(1, config))
-                        + &separator[1..]
+                        + separator.trim_end()
+                        + config.newline_style.as_str()
+                        + config.newline_style.as_str()
+                        + &config.indent_style.to_string(indentation + 1, config)
                 } else {
                     string + separator
                 }

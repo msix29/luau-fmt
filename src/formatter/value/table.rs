@@ -78,7 +78,7 @@ impl FormatWithArgs<bool> for Table {
         }
 
         let mut single_line = config.compact_table.should_be_single_line(self);
-        let (spaces, separator) = get_separator(single_line, indentation, config);
+        let (mut spaces, mut separator) = get_separator(single_line, indentation, config);
 
         let mut string = "{".to_string()
             + &spaces
@@ -96,6 +96,8 @@ impl FormatWithArgs<bool> for Table {
             let (new_spaces, new_separator) = get_separator(single_line, indentation, config);
             string = string.replace(&separator, &new_separator);
             string.replace_range(1..spaces.len() + 1, &new_spaces);
+
+            (spaces, separator) = (new_spaces, new_separator);
         }
 
         match config.trailing_commas {
