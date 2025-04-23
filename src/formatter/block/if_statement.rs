@@ -30,6 +30,8 @@ fn handle_condition(
             &(config.newline_style.to_string()
                 + &config.indent_style.to_string(indentation + 1, config)),
         );
+    } else {
+        string.push(' ');
     }
 
     string.push_str(&condition);
@@ -47,7 +49,6 @@ fn handle_condition(
 impl Format for IfStatement {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         let mut string = self.if_keyword.format(indentation, config);
-        string.push(' ');
         handle_condition(&mut string, &self.condition, indentation, config);
         string.push_str(&self.then_keyword.format(indentation, config));
         string.push_str(&self.body.format(indentation + 1, config));
@@ -65,7 +66,6 @@ impl Format for IfStatement {
 impl Format for ElseIfStatement {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         let mut string = self.elseif_keyword.format(indentation, config);
-        string.push(' ');
         handle_condition(&mut string, &self.condition, indentation, config);
         string.push_str(&self.then_keyword.format(indentation, config));
         string.push_str(&self.body.format(indentation + 1, config));
