@@ -9,7 +9,7 @@ pub enum CompactTable {
     Always,
 
     /// Only wrap the table to one line if it's made of literals such as strings, numbers.
-    /// and booleans.
+    /// and booleans. If they get too big, they'll become multiline.
     #[default]
     OnlyLiterals,
 
