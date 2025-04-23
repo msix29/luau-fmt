@@ -7,7 +7,7 @@ use crate::{
     traits::{Format, FormatWithArgs, Indentation},
 };
 
-use super::block::filter_trivia_for_comments;
+use super::block::{filter_trivia_for_comments, filter_trivia_for_spaces};
 
 impl<T: Format> FormatWithArgs<&str> for List<T> {
     fn format_with(&self, indentation: Indentation, config: &Config, separator: &str) -> String {
@@ -64,9 +64,25 @@ impl<A, T: FormatWithArgs<A>> FormatWithArgs<(&str, A)> for ListItem<T> {
                 item,
                 separator: original_separator,
             } => {
-                item.format_with(indentation, config, args)
-                    + &filter_trivia_for_comments(&original_separator.leading_trivia)
-                    + separator
+                let final_spaces = filter_trivia_for_spaces(&original_separator.trailing_trivia);
+
+                // We check for newlines instead of the config's newline_style since the user
+                // may not be using that style by default. \n is guaranteed o exist in any
+                // new line.
+                let string = item.format_with(indentation, config, args)
+                    + &filter_trivia_for_comments(&original_separator.leading_trivia);
+
+                if final_spaces.matches('\n').nth(1).is_some() {
+                    // At least 2 spaces exist, so we limit to 2
+                    // remove trailing spaces from the first one, then add the
+                    // second one without including the separator itself
+                    // (which is just the first character).
+                    string
+                        + separator.trim_end_matches(&config.indent_style.to_string(1, config))
+                        + &separator[1..]
+                } else {
+                    string + separator
+                }
             }
             ListItem::NonTrailing(item) => item.format_with(indentation, config, args),
         }
