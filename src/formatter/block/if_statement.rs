@@ -20,7 +20,10 @@ fn handle_condition(
     config: &Config,
 ) {
     let condition = condition.format(indentation, config);
-    let is_condition_multiline = condition.contains(config.newline_style.as_str());
+    // We check for newlines instead of the config's newline_style since the user
+    // may not be using that style by default. \n is guaranteed o exist in any
+    // new line.
+    let is_condition_multiline = condition.contains('\n');
 
     if is_condition_multiline {
         string.push_str(
