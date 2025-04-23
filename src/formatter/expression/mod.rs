@@ -41,7 +41,7 @@ impl Format for Expression {
             Expression::Nil(token)
             | Expression::Boolean(token)
             | Expression::Number(token)
-            | Expression::String(token) => token.format(indentation, config),
+            | Expression::String(token) => token.format(indentation + 1, config),
             Expression::Closure(closure) => closure.format(indentation, config),
             Expression::FunctionCall(function_call) => function_call.format(indentation, config),
             Expression::ExpressionWrap(bracketed) => bracketed.format(indentation + 1, config),
@@ -105,28 +105,40 @@ impl Format for Expression {
             //
             // expr ~= expr
             //     and expr ~= expr
+            //
+            // This also handles cases of super long strings and makes them not look
+            // awkward.
 
             match self {
                 Expression::BinaryExpression {
                     left,
                     operator,
                     right,
-                } => match &**right {
-                    Expression::BinaryExpression {
-                        operator: right_operator,
-                        ..
-                    } => match right_operator.token_type {
-                        TokenType::Operator(Operator::And | Operator::Or) => {
-                            left.format(indentation, config)
-                                + " "
-                                + &operator.format(indentation, config)
-                                + " "
-                                + &right.expand(indentation, config)
-                        }
+                } => {
+                    if matches!(&**right, Expression::String(_))
+                        | matches!(&**left, Expression::String(_))
+                    {
+                        // This means it's just a super long string.
+                        return string;
+                    }
+
+                    match &**right {
+                        Expression::BinaryExpression {
+                            operator: right_operator,
+                            ..
+                        } => match right_operator.token_type {
+                            TokenType::Operator(Operator::And | Operator::Or) => {
+                                left.format(indentation, config)
+                                    + " "
+                                    + &operator.format(indentation, config)
+                                    + " "
+                                    + &right.expand(indentation, config)
+                            }
+                            _ => self.expand(indentation, config),
+                        },
                         _ => self.expand(indentation, config),
-                    },
-                    _ => self.expand(indentation, config),
-                },
+                    }
+                }
                 _ => self.expand(indentation, config),
             }
         } else {
@@ -142,7 +154,7 @@ impl Expand for Expression {
             Expression::Nil(token)
             | Expression::Boolean(token)
             | Expression::Number(token)
-            | Expression::String(token) => token.format(indentation, config),
+            | Expression::String(token) => token.format(indentation + 1, config),
             Expression::Closure(closure) => closure.format(indentation, config), //TODO
             Expression::FunctionCall(function_call) => function_call.expand(indentation, config),
             Expression::ExpressionWrap(bracketed) => bracketed.expand(indentation + 1, config),
