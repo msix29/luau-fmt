@@ -78,7 +78,7 @@ fn get_trailing_trivia_var(var: &Var) -> &[Trivia] {
                 TableKey::Type(bracketed) => get_trailing_trivia_token(&bracketed.closing_bracket),
                 _ => unreachable!(),
             },
-            TableAccessKey::Name { name, .. } => &name.trailing_trivia,
+            TableAccessKey::Name { name, .. } => get_trailing_trivia_token(name),
         },
     }
 }
