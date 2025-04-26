@@ -124,7 +124,8 @@ fn handle_semicolon<F>(
     indentation: Indentation,
     config: &Config,
     get_trailing_spaces: F,
-) where
+) -> String
+where
     F: FnOnce() -> String,
 {
     let spaces = semicolon
@@ -164,6 +165,8 @@ fn handle_semicolon<F>(
     }
 
     formatted_code.push_str(&spaces);
+
+    spaces
 }
 
 fn get_name_from_statement(statement: &Statement) -> String {
@@ -188,14 +191,8 @@ fn arrange_statements(
 ) {
     let mut statements_sorted = statements.to_vec();
 
-    statements_sorted.sort_by(|a, b| {
-        println!(
-            "{} - {}",
-            get_name_from_statement(&a.0),
-            get_name_from_statement(&b.0)
-        );
-        get_name_from_statement(&a.0).cmp(&get_name_from_statement(&b.0))
-    });
+    statements_sorted
+        .sort_by(|a, b| get_name_from_statement(&a.0).cmp(&get_name_from_statement(&b.0)));
 
     for (i, (statement, _)) in statements_sorted.iter().enumerate() {
         formatted_code.push_str(&statement.format(indentation, config));
@@ -240,10 +237,29 @@ impl Format for Block {
         let mut previous_block_type = BlockType::None;
         let mut block_start_index = 0;
         let last_index = self.statements.len() - 1;
+        let mut last_spaces = String::new();
 
         for (i, (statement, semicolon)) in self.statements.iter().enumerate() {
+            let mut semicolon_string = String::new();
+            let spaces = handle_semicolon(
+                &mut semicolon_string,
+                semicolon,
+                indentation,
+                config,
+                || {
+                    get_trailing_trivia_statement(statement).format_with(
+                        indentation,
+                        config,
+                        TriviaFormattingType::SpacesOnly,
+                    )
+                },
+            );
+
             let block_type = get_block_type(statement);
-            if block_type != previous_block_type {
+            if block_type != previous_block_type
+                || last_spaces.find('\n') != last_spaces.rfind('\n')
+            {
+                last_spaces = spaces;
                 match previous_block_type {
                     BlockType::GetService | BlockType::Require => arrange_statements(
                         &mut formatted_code,
@@ -277,19 +293,12 @@ impl Format for Block {
 
                 block_start_index = i;
             } else if block_type == BlockType::GetService || block_type == BlockType::Require {
+                last_spaces = spaces;
                 continue;
             }
 
             formatted_code.push_str(&statement.format(indentation, config));
-
-            handle_semicolon(&mut formatted_code, semicolon, indentation, config, || {
-                get_trailing_trivia_statement(statement).format_with(
-                    indentation,
-                    config,
-                    TriviaFormattingType::SpacesOnly,
-                )
-            });
-
+            formatted_code.push_str(&semicolon_string);
             formatted_code.push_str(&indentation_spacing);
         }
 
