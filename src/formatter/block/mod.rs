@@ -255,7 +255,7 @@ impl Format for Block {
                 },
             );
 
-            let block_type = get_block_type(statement);
+            let block_type = get_block_type(statement, config);
             if block_type != previous_block_type
                 || last_spaces.find('\n') != last_spaces.rfind('\n')
             {
