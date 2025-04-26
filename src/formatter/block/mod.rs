@@ -19,13 +19,15 @@ use get_trailing_trivia::{
 };
 use luau_parser::{
     prelude::{Block, Statement, Token, Trivia},
-    types::{Print, TerminationStatement},
+    types::TerminationStatement,
 };
 
 use crate::{
     config::{Config, Semicolon},
-    traits::{Format, Indentation},
+    traits::{Format, FormatWithArgs, Indentation},
 };
+
+use super::trivia::TriviaFormattingType;
 
 #[inline]
 fn get_trailing_trivia_statement(statement: &Statement) -> &[Trivia] {
@@ -95,63 +97,22 @@ fn get_trailing_trivia_last_statement(last_statement: &TerminationStatement) -> 
     }
 }
 
-pub(crate) fn filter_trivia_for_spaces(trivia: &[Trivia]) -> String {
-    trivia
-        .iter()
-        .fold(String::new(), |str, trivia| match trivia {
-            Trivia::Spaces(smol_str) => str + smol_str,
-            Trivia::Comment(_) => str,
-        })
-}
-
 #[inline]
-fn get_trailing_spaces(statement: &Statement) -> String {
-    filter_trivia_for_spaces(get_trailing_trivia_statement(statement))
-}
-
-#[inline]
-fn get_trailing_spaces_last_statement(last_statement: &TerminationStatement) -> String {
-    filter_trivia_for_spaces(get_trailing_trivia_last_statement(last_statement))
-}
-
 fn get_trailing_comments<T, F>(
     (statement, semicolon): &(T, Option<Token>),
+    indentation: Indentation,
+    config: &Config,
     get_trailing_trivia: F,
 ) -> String
 where
     F: FnOnce(&T) -> &[Trivia],
 {
-    let trailing_trivia = if let Some(semicolon) = semicolon {
+    if let Some(semicolon) = semicolon {
         get_trailing_trivia_token(semicolon)
     } else {
         get_trailing_trivia(statement)
-    };
-
-    filter_trivia_for_comments(trailing_trivia)
-}
-
-#[inline]
-pub(crate) fn filter_trivia_for_comments(trivia: &[Trivia]) -> String {
-    let mut found_comment = false;
-
-    trivia
-        .iter()
-        .fold(String::new(), |str, trivia| match trivia {
-            Trivia::Spaces(smol_str) => {
-                if found_comment {
-                    found_comment = false;
-
-                    str + smol_str
-                } else {
-                    str
-                }
-            }
-            Trivia::Comment(comment) => {
-                found_comment = true;
-
-                str + comment.print().trim_end()
-            }
-        })
+    }
+    .format_with(indentation, config, TriviaFormattingType::CommentsOnly)
 }
 
 fn handle_semicolon<F>(
@@ -166,12 +127,11 @@ fn handle_semicolon<F>(
     let spaces = semicolon
         .as_ref()
         .map(|semicolon| {
-            get_trailing_trivia_token(semicolon)
-                .iter()
-                .fold(String::new(), |str, trivia| match trivia {
-                    Trivia::Spaces(smol_str) => str + smol_str,
-                    Trivia::Comment(_) => str,
-                })
+            get_trailing_trivia_token(semicolon).format_with(
+                indentation,
+                config,
+                TriviaFormattingType::SpacesOnly,
+            )
         })
         .unwrap_or_else(get_trailing_spaces);
 
@@ -226,7 +186,11 @@ impl Format for Block {
             formatted_code.push_str(&statement.format(indentation, config));
 
             handle_semicolon(&mut formatted_code, semicolon, indentation, config, || {
-                get_trailing_spaces(statement)
+                get_trailing_trivia_statement(statement).format_with(
+                    indentation,
+                    config,
+                    TriviaFormattingType::SpacesOnly,
+                )
             });
 
             formatted_code.push_str(&indentation_spacing);
@@ -240,16 +204,27 @@ impl Format for Block {
                 &last_statement.1,
                 indentation,
                 config,
-                || get_trailing_spaces_last_statement(&last_statement.0),
+                || {
+                    get_trailing_trivia_last_statement(&last_statement.0).format_with(
+                        indentation,
+                        config,
+                        TriviaFormattingType::SpacesOnly,
+                    )
+                },
             );
 
             formatted_code.push_str(&indentation_spacing);
-            formatted_code.push_str(&get_trailing_comments(last_statement, |last_statement| {
-                get_trailing_trivia_last_statement(last_statement)
-            }))
+            formatted_code.push_str(&get_trailing_comments(
+                last_statement,
+                indentation,
+                config,
+                |last_statement| get_trailing_trivia_last_statement(last_statement),
+            ))
         } else {
             formatted_code.push_str(&get_trailing_comments(
                 self.statements.last().unwrap(),
+                indentation,
+                config,
                 |statement| get_trailing_trivia_statement(statement),
             ))
         }
