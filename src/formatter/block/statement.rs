@@ -31,6 +31,7 @@ impl Format for Statement {
                 global_function.format(indentation, config)
             }
             Statement::TypeFunction(type_function) => type_function.format(indentation, config),
+            Statement::EndOfFile(end_of_file) => end_of_file.format(indentation, config),
         }
     }
 }

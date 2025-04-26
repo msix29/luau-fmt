@@ -78,6 +78,7 @@ fn get_trailing_trivia_statement(statement: &Statement) -> &[Trivia] {
         Statement::TypeFunction(type_function) => {
             get_trailing_trivia_token(&type_function.end_keyword)
         }
+        Statement::EndOfFile(token) => get_trailing_trivia_token(token),
     }
 }
 

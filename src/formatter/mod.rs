@@ -93,6 +93,7 @@ impl FormatWithArgs<TokenFormatType> for Token {
                 TokenFormatType::Name => config.variable_casing.apply(identifier),
                 TokenFormatType::None => NamingConvention::None.apply(identifier),
             },
+            TokenType::EndOfFile => "".to_string(),
 
             // `unwrap` itself is safe and should never error as this will only be
             // be called by the library, which checks for the CST's correctness
