@@ -58,9 +58,6 @@ pub struct Config {
     /// When to have `;` after statements.
     pub semicolon: Semicolon,
 
-    /// Whether or not to trim lines.
-    pub trim_lines: bool,
-
     /// Whether or not to have a newline at the end of the file.
     pub add_final_newline: bool,
 
@@ -91,7 +88,6 @@ impl Default for Config {
             keep_statements_spacing: false,
             semicolon: Default::default(),
 
-            trim_lines: true,
             add_final_newline: true,
 
             variable_casing: NamingConvention::None,
