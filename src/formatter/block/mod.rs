@@ -3,6 +3,7 @@
 mod do_block;
 mod function;
 mod generic_for;
+mod get_block_type;
 mod get_trailing_trivia;
 mod if_statement;
 mod local_assignment;
@@ -13,13 +14,14 @@ mod statement;
 mod type_definition;
 mod while_loop;
 
+use get_block_type::{BlockType, get_block_type, get_name_from_token, get_name_from_var};
 use get_trailing_trivia::{
     get_trailing_trivia_expr, get_trailing_trivia_function_call, get_trailing_trivia_token,
     get_trailing_trivia_type,
 };
 use luau_parser::{
-    prelude::{Block, Statement, Token, Trivia},
-    types::TerminationStatement,
+    prelude::{Block, Statement, TerminationStatement, Token, Trivia},
+    types::Pointer,
 };
 
 use crate::{
@@ -164,6 +166,58 @@ fn handle_semicolon<F>(
     formatted_code.push_str(&spaces);
 }
 
+fn get_name_from_statement(statement: &Statement) -> String {
+    match statement {
+        Statement::ERROR => todo!(),
+        Statement::LocalAssignment(local_assignment) => {
+            get_name_from_token(&local_assignment.name_list[0].name).unwrap()
+        }
+        Statement::SetExpression(set_expression) => {
+            get_name_from_var(&set_expression.variables[0]).unwrap()
+        }
+        _ => unreachable!(),
+    }
+}
+
+fn arrange_statements(
+    formatted_code: &mut String,
+    statements: &[(Pointer<Statement>, Option<Token>)],
+    indentation: Indentation,
+    config: &Config,
+    spacing: &str,
+) {
+    let mut statements_sorted = statements.to_vec();
+
+    statements_sorted.sort_by(|a, b| {
+        println!(
+            "{} - {}",
+            get_name_from_statement(&a.0),
+            get_name_from_statement(&b.0)
+        );
+        get_name_from_statement(&a.0).cmp(&get_name_from_statement(&b.0))
+    });
+
+    for (i, (statement, _)) in statements_sorted.iter().enumerate() {
+        formatted_code.push_str(&statement.format(indentation, config));
+
+        handle_semicolon(
+            &mut *formatted_code,
+            &statements[i].1,
+            indentation,
+            config,
+            || {
+                get_trailing_trivia_statement(&statements[i].0).format_with(
+                    indentation,
+                    config,
+                    TriviaFormattingType::SpacesOnly,
+                )
+            },
+        );
+
+        formatted_code.push_str(spacing);
+    }
+}
+
 impl Format for Block {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         let indentation_spacing = config.indent_style.to_string(indentation, config);
@@ -183,7 +237,49 @@ impl Format for Block {
             config.newline_style.to_string() + &config.indent_style.to_string(indentation, config)
         };
 
-        for (statement, semicolon) in self.statements.iter() {
+        let mut previous_block_type = BlockType::None;
+        let mut block_start_index = 0;
+        let last_index = self.statements.len() - 1;
+
+        for (i, (statement, semicolon)) in self.statements.iter().enumerate() {
+            let block_type = get_block_type(statement);
+            if block_type != previous_block_type {
+                match previous_block_type {
+                    BlockType::GetService | BlockType::Require => arrange_statements(
+                        &mut formatted_code,
+                        &self.statements[block_start_index..i],
+                        indentation,
+                        config,
+                        &indentation_spacing,
+                    ),
+                    BlockType::None => {}
+                }
+
+                previous_block_type = block_type;
+
+                match block_type {
+                    BlockType::Require | BlockType::GetService => {
+                        if i == last_index {
+                            arrange_statements(
+                                &mut formatted_code,
+                                &self.statements[block_start_index..],
+                                indentation,
+                                config,
+                                &indentation_spacing,
+                            )
+                        } else {
+                            block_start_index = i;
+                            continue;
+                        }
+                    }
+                    _ => (),
+                }
+
+                block_start_index = i;
+            } else if block_type == BlockType::GetService || block_type == BlockType::Require {
+                continue;
+            }
+
             formatted_code.push_str(&statement.format(indentation, config));
 
             handle_semicolon(&mut formatted_code, semicolon, indentation, config, || {
