@@ -43,7 +43,7 @@ pub struct Config {
 
     /// Number of spaces per tab (if [`Config::indent_style`] is
     /// [`IndentStyle::Spaces`]).
-    pub indent_size: IndentSize,
+    pub tab_size: IndentSize,
 
     /// Whether to use CRLF, LF, or CR line endings.
     pub newline_style: NewLineStyle,
@@ -81,7 +81,7 @@ impl Default for Config {
             compact_table: Default::default(),
 
             indent_style: Default::default(),
-            indent_size: 4,
+            tab_size: 4,
 
             newline_style: Default::default(),
 

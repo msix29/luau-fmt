@@ -12,8 +12,8 @@ fn is_triple_backticks(line: &str, indentation: Indentation, config: &Config) ->
     let mut chars = line.chars();
     let mut space_count = 0;
     let mut tabs_count = 0;
-    let indent_size = config.indent_size as Indentation;
-    let max_indentation = config.indent_size as Indentation * indentation + 3;
+    let indent_size = config.tab_size as Indentation;
+    let max_indentation = config.tab_size as Indentation * indentation + 3;
 
     loop {
         match chars.next() {

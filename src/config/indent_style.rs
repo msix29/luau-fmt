@@ -24,7 +24,7 @@ impl IndentStyle {
     #[inline]
     pub fn to_string(self, indentation: Indentation, config: &Config) -> String {
         match self {
-            IndentStyle::Spaces => " ".repeat(config.indent_size * indentation as usize),
+            IndentStyle::Spaces => " ".repeat(config.tab_size * indentation as usize),
             IndentStyle::Tabs => "\t".repeat(indentation as usize),
         }
     }
