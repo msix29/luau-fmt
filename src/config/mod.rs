@@ -65,8 +65,8 @@ pub struct Config {
     pub method_casing: NamingConvention,
     pub type_casing: NamingConvention,
 
-    pub arrange_requires: bool,
-    pub arrange_services: bool,
+    pub sort_requires: bool,
+    pub sort_services: bool,
 }
 
 impl Default for Config {
@@ -96,8 +96,8 @@ impl Default for Config {
             method_casing: NamingConvention::None,
             type_casing: NamingConvention::None,
 
-            arrange_services: true,
-            arrange_requires: true,
+            sort_services: true,
+            sort_requires: true,
         }
     }
 }

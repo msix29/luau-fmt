@@ -44,14 +44,14 @@ fn get_block_type_from_expr(expression: &Expression, config: &Config) -> BlockTy
     match expression {
         Expression::FunctionCall(FunctionCall { invoked, .. }) => match invoked {
             FunctionCallInvoked::Function(prefix_exp)
-                if config.arrange_requires
+                if config.sort_requires
                     && get_name_from_prefix_exp(prefix_exp)
                         .is_some_and(|name| name == "require") =>
             {
                 BlockType::Require
             }
             FunctionCallInvoked::TableMethod { table, method, .. }
-                if config.arrange_services
+                if config.sort_services
                     && get_name_from_prefix_exp(table).is_some_and(|name| name == "game")
                     && get_name_from_token(method)
                         .is_some_and(|name| name == "GetService" || name == "getService") =>
@@ -64,7 +64,7 @@ fn get_block_type_from_expr(expression: &Expression, config: &Config) -> BlockTy
         Expression::Var(Var::TableAccess(TableAccess {
             prefix: TableAccessPrefix::Name(name),
             accessed_keys,
-        })) if config.arrange_services
+        })) if config.sort_services
             && get_name_from_token(name).is_some_and(|name| name == "require")
             && accessed_keys.len() == 1 =>
         {
@@ -78,7 +78,7 @@ fn get_block_type_from_expr(expression: &Expression, config: &Config) -> BlockTy
 }
 
 pub fn get_block_type(statement: &Statement, config: &Config) -> BlockType {
-    if !config.arrange_requires && !config.arrange_services {
+    if !config.sort_requires && !config.sort_services {
         return BlockType::None;
     }
 
