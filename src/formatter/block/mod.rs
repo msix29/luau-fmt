@@ -21,7 +21,7 @@ use get_trailing_trivia::{
 };
 use luau_parser::{
     prelude::{Block, Statement, TerminationStatement, Token, Trivia},
-    types::Pointer,
+    types::{Pointer, Print},
 };
 
 use crate::{
@@ -238,9 +238,12 @@ impl Format for Block {
         let mut block_start_index = 0;
         let last_index = self.statements.len() - 1;
         let mut last_spaces = String::new();
+        let mut is_formatting = true;
+        let mut just_skipped = false;
 
-        for (i, (statement, semicolon)) in self.statements.iter().enumerate() {
+        'main_loop: for (i, (statement, semicolon)) in self.statements.iter().enumerate() {
             let mut semicolon_string = String::new();
+            let mut should_format = true;
             let spaces = handle_semicolon(
                 &mut semicolon_string,
                 semicolon,
@@ -254,6 +257,74 @@ impl Format for Block {
                     )
                 },
             );
+
+            let statement_string = statement.print_without_final_trivia();
+            let trimmed_statement = statement_string.trim_start();
+            let mut offset = statement_string.len() - trimmed_statement.len();
+
+            for line in trimmed_statement.lines() {
+                if !line.starts_with("--") {
+                    break;
+                }
+
+                let trimmed = line.trim();
+                if trimmed == "--@luau-fmt skip" {
+                    formatted_code.push_str(&statement_string);
+                    formatted_code.push_str(&semicolon_string);
+
+                    just_skipped = true;
+
+                    continue 'main_loop;
+                } else if trimmed == "--@luau-fmt skip-start" {
+                    should_format = false;
+                    is_formatting = false;
+                } else if trimmed == "--@luau-fmt skip-end" {
+                    is_formatting = true;
+
+                    if i > 0 {
+                        let leading_trivia = if let Some(semicolon) = &self.statements[i - 1].1 {
+                            semicolon.print_final_trivia()
+                        } else {
+                            self.statements[i - 1].0.print_final_trivia()
+                        };
+
+                        formatted_code.push_str(&leading_trivia[..offset]);
+                    }
+                    offset += line.len();
+                }
+            }
+
+            if !is_formatting || !should_format {
+                if !should_format {
+                    if just_skipped {
+                        handle_semicolon(
+                            &mut formatted_code,
+                            &self.statements[i - 1].1,
+                            indentation,
+                            config,
+                            || {
+                                get_trailing_trivia_statement(&self.statements[i - 1].0)
+                                    .format_with(
+                                        indentation,
+                                        config,
+                                        TriviaFormattingType::SpacesOnly,
+                                    )
+                            },
+                        );
+                    }
+
+                    formatted_code.push_str(trimmed_statement);
+                } else {
+                    formatted_code.push_str(&statement_string);
+                }
+
+                formatted_code.push_str(&semicolon.print_without_final_trivia());
+
+                just_skipped = false;
+                continue;
+            }
+
+            just_skipped = false;
 
             let block_type = get_block_type(statement, config);
             if block_type != previous_block_type
@@ -302,37 +373,39 @@ impl Format for Block {
             formatted_code.push_str(&indentation_spacing);
         }
 
-        if let Some(last_statement) = &self.last_statement {
-            formatted_code.push_str(&last_statement.0.format(indentation, config));
+        if is_formatting {
+            if let Some(last_statement) = &self.last_statement {
+                formatted_code.push_str(&last_statement.0.format(indentation, config));
 
-            handle_semicolon(
-                &mut formatted_code,
-                &last_statement.1,
-                indentation,
-                config,
-                || {
-                    get_trailing_trivia_last_statement(&last_statement.0).format_with(
-                        indentation,
-                        config,
-                        TriviaFormattingType::SpacesOnly,
-                    )
-                },
-            );
+                handle_semicolon(
+                    &mut formatted_code,
+                    &last_statement.1,
+                    indentation,
+                    config,
+                    || {
+                        get_trailing_trivia_last_statement(&last_statement.0).format_with(
+                            indentation,
+                            config,
+                            TriviaFormattingType::SpacesOnly,
+                        )
+                    },
+                );
 
-            formatted_code.push_str(&indentation_spacing);
-            formatted_code.push_str(&get_trailing_comments(
-                last_statement,
-                indentation,
-                config,
-                |last_statement| get_trailing_trivia_last_statement(last_statement),
-            ))
-        } else {
-            formatted_code.push_str(&get_trailing_comments(
-                self.statements.last().unwrap(),
-                indentation,
-                config,
-                |statement| get_trailing_trivia_statement(statement),
-            ))
+                formatted_code.push_str(&indentation_spacing);
+                formatted_code.push_str(&get_trailing_comments(
+                    last_statement,
+                    indentation,
+                    config,
+                    |last_statement| get_trailing_trivia_last_statement(last_statement),
+                ))
+            } else {
+                formatted_code.push_str(&get_trailing_comments(
+                    self.statements.last().unwrap(),
+                    indentation,
+                    config,
+                    |statement| get_trailing_trivia_statement(statement),
+                ))
+            }
         }
 
         formatted_code = formatted_code.trim_end().to_string();
