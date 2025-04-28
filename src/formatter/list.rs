@@ -40,7 +40,7 @@ impl<A: Clone, T: FormatWithArgs<A>> FormatWithArgs<(&str, A)> for List<T> {
 impl<T: Format> FormatWithArgs<&str> for ListItem<T> {
     fn format_with(&self, indentation: Indentation, config: &Config, separator: &str) -> String {
         match self {
-            ListItem::Trailing {
+            Self::Trailing {
                 item,
                 separator: original_separator,
             } => {
@@ -52,7 +52,7 @@ impl<T: Format> FormatWithArgs<&str> for ListItem<T> {
                     )
                     + separator
             }
-            ListItem::NonTrailing(item) => item.format(indentation, config),
+            Self::NonTrailing(item) => item.format(indentation, config),
         }
     }
 }
@@ -64,7 +64,7 @@ impl<A, T: FormatWithArgs<A>> FormatWithArgs<(&str, A)> for ListItem<T> {
         (separator, args): (&str, A),
     ) -> String {
         match self {
-            ListItem::Trailing {
+            Self::Trailing {
                 item,
                 separator: original_separator,
             } => {
@@ -98,7 +98,7 @@ impl<A, T: FormatWithArgs<A>> FormatWithArgs<(&str, A)> for ListItem<T> {
                     string + separator
                 }
             }
-            ListItem::NonTrailing(item) => item.format_with(indentation, config, args),
+            Self::NonTrailing(item) => item.format_with(indentation, config, args),
         }
     }
 }

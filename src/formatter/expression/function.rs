@@ -19,8 +19,8 @@ use crate::{
 impl Format for FunctionCallInvoked {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         match self {
-            FunctionCallInvoked::Function(prefix_exp) => prefix_exp.format(indentation, config),
-            FunctionCallInvoked::TableMethod {
+            Self::Function(prefix_exp) => prefix_exp.format(indentation, config),
+            Self::TableMethod {
                 table,
                 colon,
                 method,
@@ -45,13 +45,9 @@ impl Format for FunctionCall {
 impl Format for FunctionArguments {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         match self {
-            FunctionArguments::String(token) => {
-                " ".to_string() + &token.format(indentation, config)
-            }
-            FunctionArguments::Table(table) => {
-                " ".to_string() + &table.format_with(indentation, config, false)
-            }
-            FunctionArguments::List(bracketed) => bracketed.format_with(indentation, config, ", "),
+            Self::String(token) => " ".to_string() + &token.format(indentation, config),
+            Self::Table(table) => " ".to_string() + &table.format_with(indentation, config, false),
+            Self::List(bracketed) => bracketed.format_with(indentation, config, ", "),
         }
     }
 }
@@ -59,8 +55,8 @@ impl Format for FunctionArguments {
 impl Format for FunctionArgument {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         match self {
-            FunctionArgument::Expression(expression) => expression.format(indentation, config),
-            FunctionArgument::VariadicValues(token) => token.format(indentation, config),
+            Self::Expression(expression) => expression.format(indentation, config),
+            Self::VariadicValues(token) => token.format(indentation, config),
         }
     }
 }
@@ -74,8 +70,8 @@ impl Format for Closure {
 impl Expand for FunctionCallInvoked {
     fn expand(&self, indentation: Indentation, config: &Config) -> String {
         match self {
-            FunctionCallInvoked::Function(prefix_exp) => prefix_exp.expand(indentation, config),
-            FunctionCallInvoked::TableMethod {
+            Self::Function(prefix_exp) => prefix_exp.expand(indentation, config),
+            Self::TableMethod {
                 table,
                 colon,
                 method,
@@ -113,7 +109,7 @@ impl Expand for FunctionCall {
 impl Expand for FunctionArguments {
     fn expand(&self, indentation: Indentation, config: &Config) -> String {
         match self {
-            FunctionArguments::List(bracketed) => bracketed.expand_with(
+            Self::List(bracketed) => bracketed.expand_with(
                 indentation + 1,
                 config,
                 &(",".to_string()

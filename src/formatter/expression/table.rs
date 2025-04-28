@@ -15,13 +15,9 @@ use crate::{
 impl Format for TableAccessPrefix {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         match self {
-            TableAccessPrefix::Name(token) => token.format(indentation, config),
-            TableAccessPrefix::FunctionCall(function_call) => {
-                function_call.format(indentation, config)
-            }
-            TableAccessPrefix::ExpressionWrap(bracketed) => {
-                bracketed.format(indentation + 1, config)
-            }
+            Self::Name(token) => token.format(indentation, config),
+            Self::FunctionCall(function_call) => function_call.format(indentation, config),
+            Self::ExpressionWrap(bracketed) => bracketed.format(indentation + 1, config),
         }
     }
 }
@@ -29,8 +25,8 @@ impl Format for TableAccessPrefix {
 impl Format for TableAccessKey {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         match self {
-            TableAccessKey::Expression(table_key) => table_key.format(indentation, config),
-            TableAccessKey::Name { dot, name } => {
+            Self::Expression(table_key) => table_key.format(indentation, config),
+            Self::Name { dot, name } => {
                 //FIXME: What if this is a method?
                 dot.format(indentation, config)
                     + &name.format_with(indentation, config, TokenFormatType::Name)
@@ -54,9 +50,7 @@ impl Format for TableAccess {
 impl Expand for TableAccessPrefix {
     fn expand(&self, indentation: Indentation, config: &Config) -> String {
         match self {
-            TableAccessPrefix::FunctionCall(function_call) => {
-                function_call.expand(indentation, config)
-            }
+            Self::FunctionCall(function_call) => function_call.expand(indentation, config),
             _ => self.format(indentation, config),
         }
     }

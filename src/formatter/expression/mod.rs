@@ -17,9 +17,9 @@ use crate::{
 impl Format for PrefixExp {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         match self {
-            PrefixExp::Var(var) => var.format(indentation, config),
-            PrefixExp::FunctionCall(function_call) => function_call.format(indentation, config),
-            PrefixExp::ExpressionWrap(bracketed) => bracketed.format(indentation + 1, config),
+            Self::Var(var) => var.format(indentation, config),
+            Self::FunctionCall(function_call) => function_call.format(indentation, config),
+            Self::ExpressionWrap(bracketed) => bracketed.format(indentation + 1, config),
         }
     }
 }
@@ -27,8 +27,8 @@ impl Format for PrefixExp {
 impl Expand for PrefixExp {
     fn expand(&self, indentation: Indentation, config: &Config) -> String {
         match self {
-            PrefixExp::Var(var) => var.expand(indentation, config),
-            PrefixExp::FunctionCall(function_call) => function_call.expand(indentation, config),
+            Self::Var(var) => var.expand(indentation, config),
+            Self::FunctionCall(function_call) => function_call.expand(indentation, config),
             _ => self.format(indentation, config),
         }
     }
@@ -37,17 +37,16 @@ impl Expand for PrefixExp {
 impl Format for Expression {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         let string = match self {
-            Expression::ERROR => unreachable!(),
-            Expression::Nil(token)
-            | Expression::Boolean(token)
-            | Expression::Number(token)
-            | Expression::String(token) => token.format(indentation + 1, config),
-            Expression::Closure(closure) => closure.format(indentation, config),
-            Expression::FunctionCall(function_call) => function_call.format(indentation, config),
-            Expression::ExpressionWrap(bracketed) => bracketed.format(indentation + 1, config),
-            Expression::Var(var) => var.format(indentation, config),
-            Expression::Table(table) => table.format_with(indentation, config, false),
-            Expression::UnaryExpression {
+            Self::ERROR => unreachable!(),
+            Self::Nil(token) | Self::Boolean(token) | Self::Number(token) | Self::String(token) => {
+                token.format(indentation + 1, config)
+            }
+            Self::Closure(closure) => closure.format(indentation, config),
+            Self::FunctionCall(function_call) => function_call.format(indentation, config),
+            Self::ExpressionWrap(bracketed) => bracketed.format(indentation + 1, config),
+            Self::Var(var) => var.format(indentation, config),
+            Self::Table(table) => table.format_with(indentation, config, false),
+            Self::UnaryExpression {
                 operator,
                 expression,
             } => {
@@ -59,7 +58,7 @@ impl Format for Expression {
                     operator.format(indentation, config) + &expression.format(indentation, config)
                 }
             }
-            Expression::BinaryExpression {
+            Self::BinaryExpression {
                 left,
                 operator,
                 right,
@@ -79,7 +78,7 @@ impl Format for Expression {
                         + &right.format(indentation, config)
                 }
             }
-            Expression::TypeCast {
+            Self::TypeCast {
                 expression,
                 operator,
                 cast_to,
@@ -90,7 +89,7 @@ impl Format for Expression {
                     + " "
                     + &cast_to.format(indentation, config)
             }
-            Expression::IfExpression(if_expression) => if_expression.format(indentation, config),
+            Self::IfExpression(if_expression) => if_expression.format(indentation, config),
         };
 
         if string.len() > config.column_width {
@@ -110,20 +109,18 @@ impl Format for Expression {
             // awkward.
 
             match self {
-                Expression::BinaryExpression {
+                Self::BinaryExpression {
                     left,
                     operator,
                     right,
                 } => {
-                    if matches!(&**right, Expression::String(_))
-                        | matches!(&**left, Expression::String(_))
-                    {
+                    if matches!(&**right, Self::String(_)) | matches!(&**left, Self::String(_)) {
                         // This means it's just a super long string.
                         return string;
                     }
 
                     match &**right {
-                        Expression::BinaryExpression {
+                        Self::BinaryExpression {
                             operator: right_operator,
                             ..
                         } => match right_operator.token_type {
@@ -150,17 +147,16 @@ impl Format for Expression {
 impl Expand for Expression {
     fn expand(&self, indentation: Indentation, config: &Config) -> String {
         match self {
-            Expression::ERROR => unreachable!(),
-            Expression::Nil(token)
-            | Expression::Boolean(token)
-            | Expression::Number(token)
-            | Expression::String(token) => token.format(indentation + 1, config),
-            Expression::Closure(closure) => closure.format(indentation, config),
-            Expression::FunctionCall(function_call) => function_call.expand(indentation, config),
-            Expression::ExpressionWrap(bracketed) => bracketed.expand(indentation + 1, config),
-            Expression::Var(var) => var.expand(indentation, config),
-            Expression::Table(table) => table.format_with(indentation, config, false),
-            Expression::UnaryExpression {
+            Self::ERROR => unreachable!(),
+            Self::Nil(token) | Self::Boolean(token) | Self::Number(token) | Self::String(token) => {
+                token.format(indentation + 1, config)
+            }
+            Self::Closure(closure) => closure.format(indentation, config),
+            Self::FunctionCall(function_call) => function_call.expand(indentation, config),
+            Self::ExpressionWrap(bracketed) => bracketed.expand(indentation + 1, config),
+            Self::Var(var) => var.expand(indentation, config),
+            Self::Table(table) => table.format_with(indentation, config, false),
+            Self::UnaryExpression {
                 operator,
                 expression,
             } => {
@@ -172,7 +168,7 @@ impl Expand for Expression {
                     operator.format(indentation, config) + &expression.format(indentation, config)
                 }
             }
-            Expression::BinaryExpression {
+            Self::BinaryExpression {
                 left,
                 operator,
                 right,
@@ -193,7 +189,7 @@ impl Expand for Expression {
                         + &right.format(indentation, config)
                 }
             }
-            Expression::TypeCast {
+            Self::TypeCast {
                 expression,
                 operator,
                 cast_to,
@@ -204,7 +200,7 @@ impl Expand for Expression {
                     + " "
                     + &cast_to.expand(indentation, config)
             }
-            Expression::IfExpression(if_expression) => if_expression.expand(indentation, config),
+            Self::IfExpression(if_expression) => if_expression.expand(indentation, config),
         }
     }
 }

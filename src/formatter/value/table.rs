@@ -16,13 +16,11 @@ use crate::{
 impl Format for TableKey {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         match self {
-            TableKey::ERROR => unreachable!(),
-            TableKey::UndefinedNumber(_) | TableKey::UndefinedString(_) => String::new(),
-            TableKey::Simple(token) => {
-                token.format_with(indentation, config, TokenFormatType::Name)
-            }
-            TableKey::Expression(bracketed) => bracketed.format(indentation + 1, config),
-            TableKey::Type(bracketed) => bracketed.format(indentation + 1, config),
+            Self::ERROR => unreachable!(),
+            Self::UndefinedNumber(_) | Self::UndefinedString(_) => String::new(),
+            Self::Simple(token) => token.format_with(indentation, config, TokenFormatType::Name),
+            Self::Expression(bracketed) => bracketed.format(indentation + 1, config),
+            Self::Type(bracketed) => bracketed.format(indentation + 1, config),
         }
     }
 }
@@ -50,10 +48,10 @@ impl Format for TableFieldValue {
     #[inline]
     fn format(&self, indentation: Indentation, config: &Config) -> String {
         match self {
-            TableFieldValue::ERROR => unreachable!(),
-            TableFieldValue::Expression(expression) => expression.format(indentation + 1, config),
-            TableFieldValue::Type(type_value) => type_value.format(indentation + 1, config),
-            TableFieldValue::VariadicValues(token) => token.format(indentation, config),
+            Self::ERROR => unreachable!(),
+            Self::Expression(expression) => expression.format(indentation + 1, config),
+            Self::Type(type_value) => type_value.format(indentation + 1, config),
+            Self::VariadicValues(token) => token.format(indentation, config),
         }
     }
 }
