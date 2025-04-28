@@ -67,12 +67,15 @@ pub struct Config {
     pub add_final_newline: bool,
 
     /// Naming convention to use for variables.
+    #[serde(skip)]
     pub variable_casing: NamingConvention,
 
     /// Naming convention to use for methods.
+    #[serde(skip)]
     pub method_casing: NamingConvention,
 
     /// Naming convention to use for types.
+    #[serde(skip)]
     pub type_casing: NamingConvention,
 
     /// Whether or not to sort `require(...)` that are in the same block.
