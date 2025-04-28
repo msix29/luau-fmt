@@ -5,7 +5,7 @@
 // #![warn(missing_docs)]
 #![warn(clippy::absolute_paths)]
 
-pub use config::Config;
+pub use config::*;
 use luau_parser::types::Cst;
 use std::{fs, io::Error as IoError, path::Path};
 use toml::de::Error as TomlError;
