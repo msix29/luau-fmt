@@ -7,11 +7,11 @@
 //! * [`Closure`]
 
 use luau_parser::types::{
-    Closure, FunctionArgument, FunctionArguments, FunctionCall, FunctionCallInvoked,
+    Closure, Expression, FunctionArgument, FunctionArguments, FunctionCall, FunctionCallInvoked,
 };
 
 use crate::{
-    config::Config,
+    config::{Config, FunctionParenthesis},
     formatter::TokenFormatType,
     traits::{Expand, ExpandWithArgs, Format, FormatWithArgs, Indentation},
 };
@@ -42,12 +42,51 @@ impl Format for FunctionCall {
     }
 }
 
+#[inline]
+fn is_table_or_string(function_argument: &FunctionArgument) -> bool {
+    matches!(
+        function_argument,
+        FunctionArgument::Expression(Expression::Table(_) | Expression::String(_))
+    )
+}
+
 impl Format for FunctionArguments {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
-        match self {
-            Self::String(token) => " ".to_string() + &token.format(indentation, config),
-            Self::Table(table) => " ".to_string() + &table.format_with(indentation, config, false),
-            Self::List(bracketed) => bracketed.format_with(indentation, config, ", "),
+        let (is_string, is_table, string) = match self {
+            Self::String(token) => (true, false, token.format(indentation, config)),
+            Self::Table(table) => (false, true, table.format_with(indentation, config, false)),
+            Self::List(bracketed)
+                if config.function_parenthesis == FunctionParenthesis::RemoveWhenPossible
+                    && bracketed.len() == 1
+                    && is_table_or_string(&bracketed[0]) =>
+            {
+                (
+                    // The booleans aren't used if this match arm is reached,
+                    // so we don't have to worry about their values.
+                    false,
+                    false,
+                    " ".to_string() + &bracketed.item.format_with(indentation, config, ", "),
+                )
+            }
+            Self::List(bracketed) => (
+                false,
+                false,
+                bracketed.format_with(indentation, config, ", "),
+            ),
+        };
+
+        match config.function_parenthesis {
+            FunctionParenthesis::Always if is_string || is_table => "(".to_string() + &string + ")",
+            FunctionParenthesis::Keep if is_string || is_table => " ".to_string() + &string,
+            FunctionParenthesis::RemoveForStrings if is_table => "(".to_string() + &string + ")",
+            FunctionParenthesis::RemoveForTables if is_string => "(".to_string() + &string + ")",
+            FunctionParenthesis::RemoveForStrings | FunctionParenthesis::RemoveForTables => {
+                " ".to_string() + &string
+            }
+            FunctionParenthesis::RemoveWhenPossible if is_string || is_table => {
+                " ".to_string() + &string
+            }
+            _ => string,
         }
     }
 }
