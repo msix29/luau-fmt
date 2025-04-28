@@ -16,6 +16,7 @@ reexport!(
     trailing_commas,
     semicolon,
     naming_convention,
+    function_parenthesis,
 );
 
 /// Struct representing the config file.
@@ -84,6 +85,9 @@ pub struct Config {
     /// Whether or not to sort `game:GetService(...)` and `game.<IDENT>` that
     /// are in the same block.
     pub sort_services: bool,
+
+    /// When to include parenthesis around function arguments.
+    pub function_parenthesis: FunctionParenthesis,
 }
 
 impl Default for Config {
@@ -115,6 +119,8 @@ impl Default for Config {
 
             sort_services: true,
             sort_requires: true,
+
+            function_parenthesis: Default::default(),
         }
     }
 }
