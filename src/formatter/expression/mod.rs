@@ -204,7 +204,7 @@ impl Expand for Expression {
                     + " "
                     + &cast_to.format(indentation, config) //TODO
             }
-            Expression::IfExpression(if_expression) => if_expression.format(indentation, config), //TODO
+            Expression::IfExpression(if_expression) => if_expression.expand(indentation, config),
         }
     }
 }
@@ -231,6 +231,31 @@ impl Format for IfExpression {
         string
     }
 }
+impl Expand for IfExpression {
+    fn expand(&self, indentation: Indentation, config: &Config) -> String {
+        let newline_separator = config.newline_style.to_string()
+            + &config.indent_style.to_string(indentation + 1, config);
+
+        let mut string = self.if_keyword.format(indentation, config);
+        string.push(' ');
+        string.push_str(&self.condition.format(indentation, config));
+        string.push_str(&newline_separator);
+        string.push_str(&self.then_keyword.format(indentation, config));
+        string.push(' ');
+        string.push_str(&self.if_expression.format(indentation, config));
+
+        for else_if in self.else_if_expressions.iter() {
+            string.push_str(&else_if.expand(indentation, config));
+        }
+
+        string.push_str(&newline_separator);
+        string.push_str(&self.else_keyword.format(indentation, config));
+        string.push(' ');
+        string.push_str(&self.else_expression.format(indentation, config));
+
+        string
+    }
+}
 
 impl Format for ElseIfExpression {
     fn format(&self, indentation: Indentation, config: &Config) -> String {
@@ -239,6 +264,23 @@ impl Format for ElseIfExpression {
         string.push(' ');
         string.push_str(&self.condition.format(indentation, config));
         string.push(' ');
+        string.push_str(&self.then_keyword.format(indentation, config));
+        string.push(' ');
+        string.push_str(&self.expression.format(indentation, config));
+
+        string
+    }
+}
+impl Expand for ElseIfExpression {
+    fn expand(&self, indentation: Indentation, config: &Config) -> String {
+        let newline_separator = config.newline_style.to_string()
+            + &config.indent_style.to_string(indentation + 1, config);
+
+        let mut string = " ".to_string();
+        string.push_str(&self.else_if_keyword.format(indentation, config));
+        string.push(' ');
+        string.push_str(&self.condition.format(indentation, config));
+        string.push_str(&newline_separator);
         string.push_str(&self.then_keyword.format(indentation, config));
         string.push(' ');
         string.push_str(&self.expression.format(indentation, config));
