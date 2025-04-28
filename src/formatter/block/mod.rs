@@ -238,9 +238,9 @@ impl Format for Block {
         let last_index = self.statements.len() - 1;
         let mut last_spaces = String::new();
         let mut is_formatting = true;
-        let mut just_skipped = false;
+        let mut single_statement_skip = false;
 
-        'main_loop: for (i, (statement, semicolon)) in self.statements.iter().enumerate() {
+        for (i, (statement, semicolon)) in self.statements.iter().enumerate() {
             let mut semicolon_string = String::new();
             let mut should_format = true;
             let spaces = handle_semicolon(
@@ -263,17 +263,13 @@ impl Format for Block {
 
             for line in trimmed_statement.lines() {
                 if !line.starts_with("--") {
-                    break;
+                    offset += line.len();
+                    continue;
                 }
 
                 let trimmed = line.trim();
                 if trimmed == "--@luau-fmt skip" {
-                    formatted_code.push_str(&statement_string);
-                    formatted_code.push_str(&semicolon_string);
-
-                    just_skipped = true;
-
-                    continue 'main_loop;
+                    single_statement_skip = true;
                 } else if trimmed == "--@luau-fmt skip-start" {
                     should_format = false;
                     is_formatting = false;
@@ -293,41 +289,17 @@ impl Format for Block {
                 }
             }
 
-            if !is_formatting || !should_format {
-                if !should_format {
-                    if just_skipped {
-                        handle_semicolon(
-                            &mut formatted_code,
-                            &self.statements[i - 1].1,
-                            indentation,
-                            config,
-                            || {
-                                get_trailing_trivia_statement(&self.statements[i - 1].0)
-                                    .format_with(
-                                        indentation,
-                                        config,
-                                        TriviaFormattingType::SpacesOnly,
-                                    )
-                            },
-                        );
-                    }
-
-                    formatted_code.push_str(trimmed_statement);
-                } else {
-                    formatted_code.push_str(&statement_string);
-                }
-
-                formatted_code.push_str(&semicolon.print_without_final_trivia());
-
-                just_skipped = false;
-                continue;
-            }
-
-            just_skipped = false;
-
-            let block_type = get_block_type(statement, config);
+            let block_type = if single_statement_skip {
+                BlockType::None
+            } else {
+                get_block_type(statement, config)
+            };
             if block_type != previous_block_type
-                || last_spaces.find('\n') != last_spaces.rfind('\n')
+                || (last_spaces.find('\n') != last_spaces.rfind('\n')
+                    && matches!(
+                        previous_block_type,
+                        BlockType::GetService | BlockType::Require
+                    ))
             {
                 last_spaces = spaces;
                 match previous_block_type {
@@ -364,6 +336,45 @@ impl Format for Block {
                 block_start_index = i;
             } else if block_type == BlockType::GetService || block_type == BlockType::Require {
                 last_spaces = spaces;
+                continue;
+            }
+
+            if single_statement_skip {
+                formatted_code = formatted_code.trim_end().to_string();
+                formatted_code.push_str(&statement_string);
+                formatted_code.push_str(&semicolon_string);
+
+                single_statement_skip = false;
+
+                continue;
+            }
+
+            if !is_formatting || !should_format {
+                if !should_format {
+                    if single_statement_skip {
+                        handle_semicolon(
+                            &mut formatted_code,
+                            &self.statements[i - 1].1,
+                            indentation,
+                            config,
+                            || {
+                                get_trailing_trivia_statement(&self.statements[i - 1].0)
+                                    .format_with(
+                                        indentation,
+                                        config,
+                                        TriviaFormattingType::SpacesOnly,
+                                    )
+                            },
+                        );
+                    }
+
+                    formatted_code.push_str(trimmed_statement);
+                } else {
+                    formatted_code.push_str(&statement_string);
+                }
+
+                formatted_code.push_str(&semicolon.print_without_final_trivia());
+
                 continue;
             }
 
