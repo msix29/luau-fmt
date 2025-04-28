@@ -124,12 +124,21 @@ impl Expand for TypeValue {
                 pipe: token,
                 right,
             } => {
+                let right = if matches!(
+                    &**right,
+                    TypeValue::Union { .. } | TypeValue::Intersection { .. }
+                ) {
+                    right.expand(indentation, config)
+                } else {
+                    right.format(indentation, config)
+                };
+
                 left.format(indentation, config)
                     + config.newline_style.as_str()
                     + &config.indent_style.to_string(indentation + 1, config)
                     + &token.format(indentation, config)
                     + " "
-                    + &right.format(indentation, config)
+                    + &right
             }
             Self::Table(table) => table.format_with(indentation, config, true),
             Self::Typeof {
