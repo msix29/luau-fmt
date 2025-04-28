@@ -21,7 +21,7 @@ fn handle_condition(
 ) {
     let condition = condition.format(indentation, config);
     // We check for newlines instead of the config's newline_style since the user
-    // may not be using that style by default. \n is guaranteed o exist in any
+    // may not be using that style by default. \n is guaranteed to exist in any
     // new line.
     let is_condition_multiline = condition.contains('\n');
 

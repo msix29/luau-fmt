@@ -75,7 +75,7 @@ impl<A, T: FormatWithArgs<A>> FormatWithArgs<(&str, A)> for ListItem<T> {
                 );
 
                 // We check for newlines instead of the config's newline_style since the user
-                // may not be using that style by default. \n is guaranteed o exist in any
+                // may not be using that style by default. \n is guaranteed to exist in any
                 // new line.
                 let string = item.format_with(indentation, config, args)
                     + &original_separator.leading_trivia.format_with(
