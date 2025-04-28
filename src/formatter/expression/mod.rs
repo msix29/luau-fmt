@@ -155,7 +155,7 @@ impl Expand for Expression {
             | Expression::Boolean(token)
             | Expression::Number(token)
             | Expression::String(token) => token.format(indentation + 1, config),
-            Expression::Closure(closure) => closure.format(indentation, config), //TODO
+            Expression::Closure(closure) => closure.format(indentation, config),
             Expression::FunctionCall(function_call) => function_call.expand(indentation, config),
             Expression::ExpressionWrap(bracketed) => bracketed.expand(indentation + 1, config),
             Expression::Var(var) => var.expand(indentation, config),
@@ -202,7 +202,7 @@ impl Expand for Expression {
                     + " "
                     + &operator.format(indentation, config)
                     + " "
-                    + &cast_to.format(indentation, config) //TODO
+                    + &cast_to.expand(indentation, config)
             }
             Expression::IfExpression(if_expression) => if_expression.expand(indentation, config),
         }
