@@ -23,10 +23,15 @@ reexport!(
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Config {
-    /// The maximum width of characters per line.
+    /// The maximum width of characters per line. This configuration isn't very strict
+    /// as it doesn't actually limit the width of characters on the whole line but
+    /// rather parts of line. For example, an expression can never pass this width yet
+    /// a full local assignment can pass it. Also indentations aren't counted as
+    /// characters.
     pub column_width: usize,
 
-    /// The maximum width of a string per line.
+    /// The maximum width of a string per line. This fully overrides (and ignores)
+    /// `column_width`.
     pub string_width: usize,
 
     /// The maximum width of characters in a comment per line.
@@ -61,11 +66,20 @@ pub struct Config {
     /// Whether or not to have a newline at the end of the file.
     pub add_final_newline: bool,
 
+    /// Naming convention to use for variables.
     pub variable_casing: NamingConvention,
+
+    /// Naming convention to use for methods.
     pub method_casing: NamingConvention,
+
+    /// Naming convention to use for types.
     pub type_casing: NamingConvention,
 
+    /// Whether or not to sort `require(...)` that are in the same block.
     pub sort_requires: bool,
+
+    /// Whether or not to sort `game:GetService(...)` and `game.<IDENT>` that
+    /// are in the same block.
     pub sort_services: bool,
 }
 
