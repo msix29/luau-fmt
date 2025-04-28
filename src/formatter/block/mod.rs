@@ -171,7 +171,6 @@ where
 
 fn get_name_from_statement(statement: &Statement) -> String {
     match statement {
-        Statement::ERROR => todo!(),
         Statement::LocalAssignment(local_assignment) => {
             get_name_from_token(&local_assignment.name_list[0].name).unwrap()
         }
