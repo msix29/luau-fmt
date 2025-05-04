@@ -18,6 +18,7 @@ use crate::{
     traits::{Expand, ExpandWithArgs, Format, FormatWithArgs, Indentation},
 };
 
+/// Formats the passed [`TypeValue`]. Just used to clean the code a bit.
 fn format_type_value(type_value: &TypeValue, indentation: Indentation, config: &Config) -> String {
     match type_value {
         TypeValue::ERROR => unreachable!(),

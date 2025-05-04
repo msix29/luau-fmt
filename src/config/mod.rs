@@ -1,5 +1,6 @@
 //! Module holding all types related to the config file.
 
+/// A helper macro to reexport submodules
 macro_rules! reexport {
     ($($name: ident),* $(,)?) => {
         $( mod $name; )*

@@ -15,6 +15,7 @@ pub enum NewLineStyle {
 }
 
 impl NewLineStyle {
+    /// Get self as a [`&str`](str)
     #[inline]
     pub fn as_str(&self) -> &str {
         match self {
@@ -23,6 +24,7 @@ impl NewLineStyle {
         }
     }
 
+    /// Get self as a [`String`]
     #[inline]
     #[allow(clippy::inherent_to_string)]
     pub fn to_string(self) -> String {

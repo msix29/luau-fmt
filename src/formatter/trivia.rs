@@ -1,3 +1,5 @@
+//! All `impl` blocks for [`Trivia`].
+
 use luau_parser::{
     prelude::{Comment, Trivia},
     types::Print,
@@ -8,6 +10,9 @@ use crate::{
     traits::{Format, FormatWithArgs, Indentation},
 };
 
+/// Whether or not the current line starts with ` ``` `. This also checks for a
+/// maximum of 3 preceeding spaces (while accounting for indentation) since that
+/// still counts as a code block in markdown.
 fn is_triple_backticks(line: &str, indentation: Indentation, config: &Config) -> bool {
     let mut chars = line.chars();
     let mut space_count = 0;
@@ -30,6 +35,8 @@ fn is_triple_backticks(line: &str, indentation: Indentation, config: &Config) ->
     chars.as_str().starts_with("```")
 }
 
+/// Used for comment formatting. Takes the passed text and expands it to multiple
+/// lines, with every line starting with the passed prefix.
 fn wrap_text_with_prefix(
     text: &str,
     prefix: &str,
@@ -129,8 +136,13 @@ impl Format for Comment {
     }
 }
 
+/// Formatting types for [`[Trivia]`](Trivia).
 pub enum TriviaFormattingType {
+    /// Include only spaces.
     SpacesOnly,
+
+    /// Include only comments, this'll include the space after every comment to avoid
+    /// syntactical errors.
     CommentsOnly,
 }
 

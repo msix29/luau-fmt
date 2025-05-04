@@ -1,3 +1,6 @@
+//! Gets the type of a block - used for grouping blocks together to arrange the
+//! statements in them, like for `require` calls.
+
 use luau_parser::{
     prelude::{Expression, Statement, Token, TokenType},
     types::{FunctionCall, FunctionCallInvoked, PrefixExp, TableAccess, TableAccessPrefix, Var},
@@ -5,21 +8,29 @@ use luau_parser::{
 
 use crate::Config;
 
+/// The [`BlockType`] enum.
 #[rustfmt::skip]
 #[derive(Clone, Copy, Debug, Hash, PartialEq, PartialOrd, Eq, Ord)]
 #[derive(serde::Deserialize, serde::Serialize)]
 pub enum BlockType {
+    /// A `game:GetService` call, or a `game.<IDENT>`.
     GetService,
+
+    /// A `require` call.
     Require,
+
+    /// Neither of the above.
     None,
 }
 
+/// Tries getting the name (identifier) from the passed [`Token`].
 #[inline]
 pub fn get_name_from_token(token: &Token) -> Option<String> {
     matches!(token.token_type, TokenType::Identifier(_))
         .then(|| token.token_type.try_as_string().unwrap())
 }
 
+/// Tries getting the name (identifier) from the passed [`Var`]
 #[inline]
 pub fn get_name_from_var(var: &Var) -> Option<String> {
     match var {
@@ -32,6 +43,7 @@ pub fn get_name_from_var(var: &Var) -> Option<String> {
     }
 }
 
+/// Tries getting the name (identifier) from the passed [`PrefixExp`]
 #[inline]
 fn get_name_from_prefix_exp(prefix_exp: &PrefixExp) -> Option<String> {
     match prefix_exp {
@@ -40,6 +52,7 @@ fn get_name_from_prefix_exp(prefix_exp: &PrefixExp) -> Option<String> {
     }
 }
 
+/// Gets the [`BlockType`] depending on the passed [`Expression`].
 fn get_block_type_from_expr(expression: &Expression, config: &Config) -> BlockType {
     match expression {
         Expression::FunctionCall(FunctionCall { invoked, .. }) => match invoked {
@@ -77,6 +90,7 @@ fn get_block_type_from_expr(expression: &Expression, config: &Config) -> BlockTy
     }
 }
 
+/// Gets the [`BlockType`] for the passed [`Statement`].
 pub fn get_block_type(statement: &Statement, config: &Config) -> BlockType {
     if !config.sort_requires && !config.sort_services {
         return BlockType::None;

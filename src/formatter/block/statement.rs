@@ -1,3 +1,5 @@
+//! All `impl` blocks for [`Statement`] and [`TerminationStatement`]
+
 use luau_parser::types::{Statement, TerminationStatement};
 
 use crate::{

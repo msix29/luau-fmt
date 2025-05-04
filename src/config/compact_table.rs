@@ -24,6 +24,7 @@ pub enum CompactTable {
 }
 
 impl CompactTable {
+    /// Whether or not the passed [`Expression`] counts as a literal.
     fn is_literal_expression(&self, expression: &Expression) -> bool {
         match expression {
             Expression::Nil(_)
@@ -40,6 +41,7 @@ impl CompactTable {
         }
     }
 
+    /// Whether or not the passed [`TypeValue`] counts as a literal.
     fn is_literal_type_value(&self, type_value: &TypeValue) -> bool {
         match type_value {
             TypeValue::String(_)
@@ -61,6 +63,7 @@ impl CompactTable {
         }
     }
 
+    /// Whether or not the passed [`Table`] should be single line.
     pub fn should_be_single_line(&self, table: &Table) -> bool {
         match self {
             CompactTable::Always => true,

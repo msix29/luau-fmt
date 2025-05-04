@@ -42,6 +42,7 @@ impl Format for FunctionCall {
     }
 }
 
+/// Whether or not the passed [`FunctionArgument`] is a table or a string.
 #[inline]
 fn is_table_or_string(function_argument: &FunctionArgument) -> bool {
     matches!(

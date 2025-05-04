@@ -5,7 +5,7 @@
 #[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
 #[derive(serde::Serialize, serde::Deserialize)]
 pub enum NamingConvention {
-    // `camelCase`.
+    /// `camelCase`.
     #[serde(rename = "camelCase")]
     Camel,
 
@@ -28,6 +28,7 @@ fn is_splitter(char: char) -> bool {
     char == '_' || char.is_uppercase()
 }
 
+/// Splits the passed identifier into words
 fn get_words(identifier: &str) -> Vec<String> {
     let mut words = Vec::new();
     let mut current_word = String::new();
@@ -45,6 +46,8 @@ fn get_words(identifier: &str) -> Vec<String> {
     words
 }
 
+/// Capitalizes the first letter if the passed word if it's at least one
+/// character long
 fn capitalize_first_letter(word: &mut str) -> &str {
     if word.len() > 1 {
         word[..1].make_ascii_uppercase();
@@ -54,6 +57,7 @@ fn capitalize_first_letter(word: &mut str) -> &str {
 }
 
 impl NamingConvention {
+    /// Applies self onto the passed identifier and returns the new one.
     pub fn apply(&self, identifier: &str) -> String {
         if *self == Self::None {
             return identifier.to_string()

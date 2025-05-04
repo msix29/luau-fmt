@@ -22,6 +22,7 @@ pub enum IndentStyle {
 }
 
 impl IndentStyle {
+    /// Get the current indentation as a string.
     #[inline]
     pub fn to_string(self, indentation: Indentation, config: &Config) -> String {
         match self {

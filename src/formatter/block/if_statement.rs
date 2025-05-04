@@ -13,6 +13,7 @@ use crate::{
     traits::{Format, Indentation},
 };
 
+/// Handles formatting the condition of a [`IfStatement`] or an [`ElseIfStatement`].
 fn handle_condition(
     string: &mut String,
     condition: &Rc<Expression>,

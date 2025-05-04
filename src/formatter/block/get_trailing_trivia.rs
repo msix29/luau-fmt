@@ -1,13 +1,17 @@
+//! Helper functions to get the trailing trivia from various [`luau_parser`] types.
+
 use luau_parser::{
     prelude::{Expression, FunctionCall, TableAccessKey, TableKey, Token, Trivia, TypeValue, Var},
     types::FunctionArguments,
 };
 
+/// Gets the trailing trivia of a [`Token`]
 #[inline]
 pub fn get_trailing_trivia_token(token: &Token) -> &[Trivia] {
     &token.trailing_trivia
 }
 
+/// Gets the trailing trivia of an [`Expression`]
 #[inline]
 pub fn get_trailing_trivia_expr(expression: &Expression) -> &[Trivia] {
     match expression {
@@ -34,6 +38,7 @@ pub fn get_trailing_trivia_expr(expression: &Expression) -> &[Trivia] {
     }
 }
 
+/// Gets the trailing trivia of a [`TypeValue`]
 #[inline]
 pub fn get_trailing_trivia_type(type_value: &TypeValue) -> &[Trivia] {
     match type_value {
@@ -64,6 +69,7 @@ pub fn get_trailing_trivia_type(type_value: &TypeValue) -> &[Trivia] {
     }
 }
 
+/// Gets the trailing trivia of a [`Var`]
 #[inline]
 fn get_trailing_trivia_var(var: &Var) -> &[Trivia] {
     match var {
@@ -83,6 +89,7 @@ fn get_trailing_trivia_var(var: &Var) -> &[Trivia] {
     }
 }
 
+/// Gets the trailing trivia of a [`FunctionCall`]
 #[inline]
 pub fn get_trailing_trivia_function_call(function_call: &FunctionCall) -> &[Trivia] {
     match &function_call.arguments {

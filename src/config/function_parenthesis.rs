@@ -6,11 +6,11 @@
 #[derive(serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum FunctionParenthesis {
-    // Always include parenthesis.
+    /// Always include parenthesis.
     #[default]
     Always,
 
-    // Keep it as it is; don't add nor remove parenthesis.
+    /// Keep it as it is; don't add nor remove parenthesis.
     Keep,
 
     /// Remove them only for strings (one argument max).

@@ -7,6 +7,7 @@ use crate::{
     traits::{Expand, ExpandWithArgs, Format, FormatWithArgs, Indentation},
 };
 
+/// Actual implementation for [`Bracketed<T>`] formatting.
 macro_rules! format {
     (
         $self: ident,
@@ -44,6 +45,7 @@ impl<A, T: FormatWithArgs<A>> FormatWithArgs<A> for Bracketed<T> {
     }
 }
 
+/// Actual implementation for [`Bracketed<T>`] expanding.
 macro_rules! expand {
     (
         $self: ident,

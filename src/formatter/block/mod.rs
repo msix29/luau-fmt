@@ -31,6 +31,7 @@ use crate::{
 
 use super::trivia::TriviaFormattingType;
 
+/// Get the trailing trivia of a [`Statement`].
 #[inline]
 fn get_trailing_trivia_statement(statement: &Statement) -> &[Trivia] {
     match statement {
@@ -84,6 +85,7 @@ fn get_trailing_trivia_statement(statement: &Statement) -> &[Trivia] {
     }
 }
 
+/// Get the trailing trivia of a [`TerminationStatement`].
 #[inline]
 fn get_trailing_trivia_last_statement(last_statement: &TerminationStatement) -> &[Trivia] {
     match last_statement {
@@ -100,6 +102,7 @@ fn get_trailing_trivia_last_statement(last_statement: &TerminationStatement) -> 
     }
 }
 
+/// Get the trailing comments of a [`Statement`] or a [`TerminationStatement`].
 #[inline]
 fn get_trailing_comments<T, F>(
     (statement, semicolon): &(T, Option<Token>),
@@ -118,6 +121,8 @@ where
     .format_with(indentation, config, TriviaFormattingType::CommentsOnly)
 }
 
+/// Handles the semicolon character that may or may not be after a [`Statement`] or
+/// a [`TerminationStatement`].
 fn handle_semicolon<F>(
     formatted_code: &mut String,
     semicolon: &Option<Token>,
@@ -169,6 +174,7 @@ where
     spaces
 }
 
+/// Gets the name (identefier) from a [`Statement`]
 fn get_name_from_statement(statement: &Statement) -> String {
     match statement {
         Statement::LocalAssignment(local_assignment) => {
@@ -181,6 +187,8 @@ fn get_name_from_statement(statement: &Statement) -> String {
     }
 }
 
+/// Arranges the passed statements in alphabetical order (by first variable name)
+/// and appends them to `formatted_code`.
 fn arrange_statements(
     formatted_code: &mut String,
     statements: &[(Pointer<Statement>, Option<Token>)],

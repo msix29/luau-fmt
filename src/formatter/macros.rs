@@ -1,3 +1,6 @@
+//! Helper macros.
+
+/// Formats the parameters and returns. Expands the parameters if they're too long.
 macro_rules! handle_parameters_and_returns {
     (
         ( $parameters:expr, $(+ $space:literal +)? $symbol:expr, $return_type:expr ),
@@ -38,6 +41,8 @@ macro_rules! handle_parameters_and_returns {
     };
 }
 
+/// A helper function for [`format_function!`] macro. It's mainly to handle type
+/// functions since they may have a preceeding `export` keyword.
 macro_rules! format_function_start_inner {
     ($self:ident . $export:ident, $indentation: ident, $config: ident) => {
         if $self.$export.is_some() {
@@ -53,6 +58,7 @@ macro_rules! format_function_start_inner {
     };
 }
 
+/// Formats all function types, local, global, closures, and type functions.
 macro_rules! format_function {
     (
         $self: ident,
@@ -63,7 +69,6 @@ macro_rules! format_function {
         $(let name = $function_name:ident;)?
     ) => {{
         let mut string = format_function_start_inner!($self $(. $export)?, $indentation, $config);
-        // $self.attributes.format($indentation, $config);
         $(
             string.push_str(&$self.$keyword.format($indentation, $config));
             string.push(' ');

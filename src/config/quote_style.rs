@@ -28,11 +28,17 @@ pub enum QuoteStyle {
     PreferDouble,
 }
 
+/// Escaped `'`
 const ESCAPED_QUOTE: &str = r"\'";
+/// `'`
 const QUOTE: &str = r"'";
+
+/// Escaped `"`
 const ESCAPED_DOUBLE_QUOTE: &str = r#"\""#;
+/// `"`
 const DOUBLE_QUOTE: &str = r#"""#;
 
+/// Does conversion between quotation types.
 macro_rules! convert {
     ($str: ident, $quotes: ident, $(($from:ident => $to:ident)),* $(,)?) => {{
         let mut string = $str $(.replace($from, $to))*;
@@ -42,6 +48,7 @@ macro_rules! convert {
     }};
 }
 
+/// Counts the number of escapes in the passed string
 fn count_escapes(string: &str) -> usize {
     let bytes = string.as_bytes();
 
@@ -116,6 +123,7 @@ impl QuoteStyle {
         }
     }
 
+    /// Applies the quoting style to the passed string
     pub fn apply(&self, luau_string: &LuauString) -> String {
         match luau_string {
             LuauString::Backticks(smol_str) | LuauString::MultiLine(smol_str) => {

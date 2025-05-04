@@ -1,3 +1,4 @@
+/// When to include trailing commas in tables
 #[rustfmt::skip]
 #[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
 #[derive(serde::Serialize, serde::Deserialize)]

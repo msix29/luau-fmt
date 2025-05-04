@@ -56,6 +56,8 @@ impl Format for TableFieldValue {
     }
 }
 
+/// Gets the separator between 2 table fields, while accounting for configuration
+/// options and indentation.
 fn get_separator(single_line: bool, indentation: Indentation, config: &Config) -> (String, String) {
     let spaces = if single_line {
         " ".to_string()
