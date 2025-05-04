@@ -5,9 +5,6 @@
 #[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
 #[derive(serde::Serialize, serde::Deserialize)]
 pub enum NewLineStyle {
-    /// `\r`
-    CR,
-
     /// `\n` - default for Unix systems.
     #[default]
     LF,
@@ -21,7 +18,6 @@ impl NewLineStyle {
     #[inline]
     pub fn as_str(&self) -> &str {
         match self {
-            NewLineStyle::CR => "\r",
             NewLineStyle::LF => "\n",
             NewLineStyle::CRLF => "\n\r",
         }

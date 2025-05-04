@@ -6,6 +6,7 @@ use luau_parser::types::{Expression, Table, TableFieldValue, TypeValue, Var};
 #[rustfmt::skip]
 #[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
 #[derive(serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum CompactTable {
     /// Always wrap the table to one line.
     Always,

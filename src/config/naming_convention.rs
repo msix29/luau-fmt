@@ -6,16 +6,20 @@
 #[derive(serde::Serialize, serde::Deserialize)]
 pub enum NamingConvention {
     // `camelCase`.
+    #[serde(rename = "camelCase")]
     Camel,
 
     /// `PascalCase`
+    #[serde(rename = "PascalCase")]
     Pascal,
 
     /// `snake_case`
+    #[serde(rename = "snake_case")]
     Snake,
 
     /// Keep it as it is.
     #[default]
+    #[serde(rename = "none")]
     None,
 }
 

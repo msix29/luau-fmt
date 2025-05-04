@@ -11,6 +11,7 @@ pub type IndentSize = usize;
 #[rustfmt::skip]
 #[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
 #[derive(serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum IndentStyle {
     /// Use spaces where each tab is <n> spaces.
     #[default]
