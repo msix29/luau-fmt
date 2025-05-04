@@ -65,7 +65,7 @@ fn main() -> io::Result<()> {
     let config = if let Some(path) = &args.config_path {
         load_config(path).unwrap_or_default()
     } else {
-        Config::default()
+        load_config(PathBuf::from("luaufmt.toml")).unwrap_or_default()
     };
 
     format_path(&args.path, &config)
