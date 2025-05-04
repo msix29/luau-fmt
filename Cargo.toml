@@ -2,6 +2,13 @@
 name = "luau-fmt"
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
+readme = "README.md"
+keywords = ["luau", "formatter"]
+
+documentation = "https://docs.rs/luau-lexer"
+repository = "https://github.com/msix29/luau-lexer"
+homepage = "https://github.com/msix29/luau-lexer"
 
 [dependencies]
 clap = { version = "4.5.37", features = ["derive"] }
