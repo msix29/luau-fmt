@@ -7,7 +7,9 @@
 
 pub use config::*;
 use luau_parser::types::Cst;
+#[cfg(feature = "config-loading")]
 use std::{fs, io::Error as IoError, path::Path};
+#[cfg(feature = "config-loading")]
 use toml::de::Error as TomlError;
 use traits::Format;
 
@@ -42,6 +44,7 @@ pub fn format_with_config(cst: &Cst, config: &Config) -> Result<String, Formatti
 }
 
 /// Errors that may happen during loading of a [`Config`] from a `.toml` file.
+#[cfg(feature = "config-loading")]
 pub enum LoadConfigError {
     /// An [`io error`](IoError).
     Io(IoError),
@@ -50,12 +53,14 @@ pub enum LoadConfigError {
     Toml(TomlError),
 }
 
+#[cfg(feature = "config-loading")]
 impl From<IoError> for LoadConfigError {
     #[inline]
     fn from(value: IoError) -> Self {
         Self::Io(value)
     }
 }
+#[cfg(feature = "config-loading")]
 impl From<TomlError> for LoadConfigError {
     #[inline]
     fn from(value: TomlError) -> Self {
@@ -65,6 +70,7 @@ impl From<TomlError> for LoadConfigError {
 
 /// Load a [`Config`] from the passed path.
 #[inline]
+#[cfg(feature = "config-loading")]
 pub fn load_config<P: AsRef<Path>>(path: P) -> Result<Config, LoadConfigError> {
     fs::read_to_string(path)
         .map(|content| toml::from_str(&content))?

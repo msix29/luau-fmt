@@ -11,11 +11,15 @@ repository = "https://github.com/msix29/luau-lexer"
 homepage = "https://github.com/msix29/luau-lexer"
 
 [dependencies]
-clap = { version = "4.5.37", features = ["derive"] }
+clap = { version = "4.5.37", features = ["derive"], optional = true }
 luau-parser = "0.2.62"
 serde = { version = "1.0.219", features = ["derive"] }
-toml = "0.8.20"
+toml = { version = "0.8.20", optional = true }
+
+[features]
+config-loading = ["dep:clap", "dep:toml"]
 
 [[bin]]
 name = "luaufmt"
 path = "src/main.rs"
+required-features = ["config-loading"]
