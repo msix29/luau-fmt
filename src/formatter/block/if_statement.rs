@@ -4,9 +4,7 @@
 //! * [`ElseStatement`]
 //! * [`ElseIfStatement`]
 
-use std::rc::Rc;
-
-use luau_parser::types::{ElseIfStatement, ElseStatement, Expression, IfStatement};
+use luau_parser::types::{ElseIfStatement, ElseStatement, Expression, IfStatement, Pointer};
 
 use crate::{
     config::Config,
@@ -16,7 +14,7 @@ use crate::{
 /// Handles formatting the condition of a [`IfStatement`] or an [`ElseIfStatement`].
 fn handle_condition(
     string: &mut String,
-    condition: &Rc<Expression>,
+    condition: &Pointer<Expression>,
     indentation: Indentation,
     config: &Config,
 ) {
