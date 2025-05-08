@@ -18,6 +18,7 @@ toml = { version = "0.8.20", optional = true }
 
 [features]
 config-loading = ["dep:clap", "dep:toml"]
+async = ["luau-parser/async"]
 
 [[bin]]
 name = "luaufmt"
