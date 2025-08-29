@@ -47,7 +47,7 @@ impl Format for FunctionCall {
 fn is_table_or_string(function_argument: &FunctionArgument) -> bool {
     matches!(
         function_argument,
-        FunctionArgument::Expression(Expression::Table(_) | Expression::String(_))
+        FunctionArgument::Expression(expression) if matches!(&**expression, Expression::Table(_) | Expression::String(_))
     )
 }
 
